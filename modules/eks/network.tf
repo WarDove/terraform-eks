@@ -10,7 +10,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags = {
-    Name = "${var.vpc_cidr}"
+    Name = "${var.cluster_name}-vpc | ${var.vpc_cidr}"
   }
 }
 
@@ -18,7 +18,7 @@ resource "aws_vpc" "main" {
 resource "aws_internet_gateway" "main_igw" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "eks-igw"
+    Name = "${var.cluster_name}-igw"
   }
 
   lifecycle {
@@ -31,7 +31,7 @@ resource "aws_eip" "ngw_eip" {
   count = var.az_count
   vpc   = true
   tags = {
-    Name = "eks-ngw-eip-${var.az_names[count.index]}"
+    Name = "${var.cluster_name}-eip-${var.az_names[count.index]}"
   }
 }
 
@@ -41,7 +41,7 @@ resource "aws_nat_gateway" "public_ngw" {
   subnet_id     = aws_subnet.private_subnet[count.index].id
 
   tags = {
-    Name = "eks-ngw-${var.az_names[count.index]}"
+    Name = "${var.cluster_name}-ngw-${var.az_names[count.index]}"
   }
 
   depends_on = [aws_internet_gateway.main_igw, aws_eip.ngw_eip]
@@ -52,7 +52,7 @@ resource "aws_default_route_table" "rt_main" {
   default_route_table_id = aws_vpc.main.default_route_table_id
 
   tags = {
-    Name = "rt_main"
+    Name = "${var.cluster_name}-main-rt"
   }
 }
 
@@ -66,7 +66,7 @@ resource "aws_route_table" "public_rt" {
   }
 
   tags = {
-    Name = "${upper(substr(var.az_names[count.index], -1, 1))} public-rt"
+    Name = "${var.cluster_name}-public-rt"
   }
 }
 
@@ -75,7 +75,7 @@ resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${upper(substr(var.az_names[count.index], -1, 1))} private-rt"
+    Name = "${var.cluster_name}-private-rt"
   }
 }
 
@@ -107,7 +107,7 @@ resource "aws_subnet" "private_subnet" {
   map_public_ip_on_launch = false
   availability_zone       = var.az_names[count.index]
   tags = {
-    Name = "${upper(substr(var.az_names[count.index], -1, 1))} private"
+    Name = "${upper(substr(var.az_names[count.index], -1, 1))} private | ${var.cluster_name}-subnet"
   }
 }
 
@@ -118,13 +118,13 @@ resource "aws_subnet" "public_subnet" {
   map_public_ip_on_launch = true
   availability_zone       = var.az_names[count.index]
   tags = {
-    Name = "${upper(substr(var.az_names[count.index], -1, 1))} public"
+    Name = "${upper(substr(var.az_names[count.index], -1, 1))} public | ${var.cluster_name}-subnet"
   }
 }
 
 # Security groups
 resource "aws_security_group" "private" {
-  name        = "eks-private-sg"
+  name        = "${var.cluster_name}-private-sg"
   description = "Security group for private resources"
   vpc_id      = aws_vpc.main.id
 
@@ -144,7 +144,7 @@ resource "aws_security_group" "private" {
 }
 
 resource "aws_security_group" "public" {
-  name        = "eks-public-sg"
+  name        = "${var.cluster_name}-public-sg"
   description = "Security group for public resources"
   vpc_id      = aws_vpc.main.id
 

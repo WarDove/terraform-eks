@@ -46,39 +46,19 @@ resource "aws_eks_cluster" "eks-cluster" {
   ]
 }
 
+output "kube_api_endpoint" {
+  value = aws_eks_cluster.eks-cluster.endpoint
+}
+
+output "kubeconfig-certificate-authority-data" {
+  value = aws_eks_cluster.eks-cluster.certificate_authority[0].data
+}
+
 # LOG GROUP FOR EKS LOGGING
 resource "aws_cloudwatch_log_group" "eks-cluster" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 7
 }
-
-# FARGATE-POD-EXECUTION-ROLE
-data "aws_iam_policy_document" "fargate-pod-execution-role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    condition {
-      test     = "ArnLike"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:eks:${var.region_id}:${var.account_id}:fargateprofile/${var.cluster_name}-fargate/*"]
-    }
-    principals {
-      type        = "Service"
-      identifiers = ["eks-fargate-pods.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "fargate-pod-execution-role" {
-  name               = "eksClusterRole"
-  assume_role_policy = data.aws_iam_policy_document.fargate-pod-execution-role.json
-}
-
-resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
-  role       = aws_iam_role.fargate-pod-execution-role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
-}
-
 
 
 # # FARGATE PROFILE
@@ -91,4 +71,32 @@ resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
 #   selector {
 #     namespace = "example"
 #   }
+# }
+
+
+# # FARGATE-POD-EXECUTION-ROLE
+# data "aws_iam_policy_document" "fargate-pod-execution-role" {
+#   statement {
+#     actions = ["sts:AssumeRole"]
+
+#     condition {
+#       test     = "ArnLike"
+#       variable = "aws:SourceArn"
+#       values   = ["arn:aws:eks:${var.region_id}:${var.account_id}:fargateprofile/${var.cluster_name}-fargate/*"]
+#     }
+#     principals {
+#       type        = "Service"
+#       identifiers = ["eks-fargate-pods.amazonaws.com"]
+#     }
+#   }
+# }
+
+# resource "aws_iam_role" "fargate-pod-execution-role" {
+#   name               = "eksClusterRole"
+#   assume_role_policy = data.aws_iam_policy_document.fargate-pod-execution-role.json
+# }
+
+# resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
+#   role       = aws_iam_role.fargate-pod-execution-role.name
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
 # }
