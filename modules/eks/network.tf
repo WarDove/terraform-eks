@@ -38,7 +38,7 @@ resource "aws_eip" "ngw_eip" {
 resource "aws_nat_gateway" "public_ngw" {
   count         = var.az_count
   allocation_id = aws_eip.ngw_eip[count.index].id
-  subnet_id     = aws_subnet.private_subnet[count.index].id
+  subnet_id     = aws_subnet.public_subnet[count.index].id
 
   tags = {
     Name = "${var.cluster_name}-ngw-${var.az_names[count.index]}"

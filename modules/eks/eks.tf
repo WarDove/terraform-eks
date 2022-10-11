@@ -53,7 +53,7 @@ resource "aws_eks_cluster" "eks-cluster" {
     subnet_ids              = aws_subnet.private_subnet[*].id
     security_group_ids      = aws_security_group.private[*].id
     endpoint_private_access = true
-    endpoint_public_access  = false
+    endpoint_public_access  = true
   }
 
   depends_on = [
@@ -107,7 +107,7 @@ data "aws_iam_policy_document" "eks-vpc-cni-role" {
 }
 
 # addons
-resource "aws_eks_addon" "eks-cluster-coredns" {
+resource "aws_eks_addon" "eks-cluster-vpc-cni" {
   cluster_name      = aws_eks_cluster.eks-cluster.name
   addon_name        = "vpc-cni"
   addon_version     = "v1.10.4-eksbuild.1"
@@ -115,13 +115,12 @@ resource "aws_eks_addon" "eks-cluster-coredns" {
   service_account_role_arn = aws_iam_role.eks-vpc-cni-role.arn
 }
 
-# resource "aws_eks_addon" "eks-cluster-coredns" {
-#   cluster_name      = aws_eks_cluster.eks-cluster.name
-#   addon_name        = "coredns"
-#   addon_version     = "v1.8.7-eksbuild.2"
-#   resolve_conflicts = "NONE"
-# }
-
+resource "aws_eks_addon" "eks-cluster-kube-proxy" {
+  cluster_name      = aws_eks_cluster.eks-cluster.name
+  addon_name        = "kube-proxy"
+  addon_version     = "v1.23.7-eksbuild.1"
+  resolve_conflicts = "OVERWRITE" 
+}
 
 
 # FARGATE PROFILE
