@@ -95,6 +95,12 @@ data "aws_iam_policy_document" "eks-vpc-cni-role" {
 
     condition {
       test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.oidc_provider_sts.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
       variable = "${replace(aws_iam_openid_connect_provider.oidc_provider_sts.url, "https://", "")}:sub"
       values   = ["system:serviceaccount:kube-system:aws-node"]
     }
@@ -147,8 +153,9 @@ data "aws_iam_policy_document" "fargate-pod-execution-role" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:eks:${var.region_id}:${var.account_id}:fargateprofile/${var.cluster_name}/*"]
+      values   = ["arn:aws:eks:${var.region}:${var.account_id}:fargateprofile/${var.cluster_name}/*"]
     }
+
     principals {
       type        = "Service"
       identifiers = ["eks-fargate-pods.amazonaws.com"]
@@ -164,4 +171,49 @@ resource "aws_iam_role" "fargate-pod-execution-role" {
 resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
   role       = aws_iam_role.fargate-pod-execution-role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+}
+
+
+# AWS Load Balancer Controller 
+resource "aws_iam_policy" "aws-lbc-policy" {
+  name        = "AWSLoadBalancerControllerIAMPolicy"
+  description = "AWS Load Balancer Controller iam policy"
+  
+  # Check if region is either us-east or us-west
+  policy = length(regexall("us-east.*|us-west.*","${var.region}")) > 0 ? file("${path.cwd}/iam_policies/iam_policy_us-gov.json") : file("${path.cwd}/iam_policies/iam_policy.json")
+}
+
+
+data "aws_iam_policy_document" "aws-lbc-role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.oidc_provider_sts.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.oidc_provider_sts.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.oidc_provider_sts.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "aws-lbc-role" {
+  assume_role_policy = data.aws_iam_policy_document.aws-lbc-role.json
+  name               = "AmazonEKSLoadBalancerControllerRole"
+}
+
+resource "aws_iam_role_policy_attachment" "aws-lbc-role" {
+  policy_arn = aws_iam_policy.aws-lbc-policy.arn
+  role       = aws_iam_role.eks-vpc-cni-role.name
 }
