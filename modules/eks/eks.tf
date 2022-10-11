@@ -3,11 +3,11 @@ locals {
   selectors = [
     {
       namespace = "default",
-      labels = {}
+      labels    = {}
     },
     {
       namespace = "kube-system",
-      labels = {}
+      labels    = {}
     }
   ]
 
@@ -108,10 +108,10 @@ data "aws_iam_policy_document" "eks-vpc-cni-role" {
 
 # addons
 resource "aws_eks_addon" "eks-cluster-vpc-cni" {
-  cluster_name      = aws_eks_cluster.eks-cluster.name
-  addon_name        = "vpc-cni"
-  addon_version     = "v1.10.4-eksbuild.1"
-  resolve_conflicts = "NONE"
+  cluster_name             = aws_eks_cluster.eks-cluster.name
+  addon_name               = "vpc-cni"
+  addon_version            = "v1.10.4-eksbuild.1"
+  resolve_conflicts        = "NONE"
   service_account_role_arn = aws_iam_role.eks-vpc-cni-role.arn
 }
 
@@ -119,9 +119,8 @@ resource "aws_eks_addon" "eks-cluster-kube-proxy" {
   cluster_name      = aws_eks_cluster.eks-cluster.name
   addon_name        = "kube-proxy"
   addon_version     = "v1.23.7-eksbuild.1"
-  resolve_conflicts = "OVERWRITE" 
+  resolve_conflicts = "OVERWRITE"
 }
-
 
 # FARGATE PROFILE
 resource "aws_eks_fargate_profile" "eks-cluster-fargate" {
