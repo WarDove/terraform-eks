@@ -1,3 +1,18 @@
+# Configuration block(s) for selecting Kubernetes Pods to execute with this EKS Fargate Profile.
+locals {
+  selectors = [
+    {
+      namespace = "default",
+      labels = {}
+    },
+    {
+      namespace = "kube-system",
+      labels = {}
+    }
+  ]
+
+}
+
 # ECS-CLUSTER-ROLE
 data "aws_iam_policy_document" "eks-cluster-role" {
   statement {
@@ -30,15 +45,15 @@ resource "aws_eks_cluster" "eks-cluster" {
   encryption_config {
     provider {
       key_arn = aws_kms_key.eks-cluster.arn
-    }    
+    }
     resources = ["secrets"]
   }
 
   vpc_config {
-    subnet_ids = aws_subnet.private_subnet[*].id
-    security_group_ids = aws_security_group.private[*].id
+    subnet_ids              = aws_subnet.private_subnet[*].id
+    security_group_ids      = aws_security_group.private[*].id
     endpoint_private_access = true
-    endpoint_public_access = false
+    endpoint_public_access  = false
   }
 
   depends_on = [
@@ -46,57 +61,109 @@ resource "aws_eks_cluster" "eks-cluster" {
   ]
 }
 
-output "kube_api_endpoint" {
-  value = aws_eks_cluster.eks-cluster.endpoint
-}
-
-output "kubeconfig-certificate-authority-data" {
-  value = aws_eks_cluster.eks-cluster.certificate_authority[0].data
-}
-
-# LOG GROUP FOR EKS LOGGING
+# log group for eks
 resource "aws_cloudwatch_log_group" "eks-cluster" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 7
 }
 
+# IAM Role for EKS Addon "vpc-cni" with AWS managed policy
+data "tls_certificate" "oidc_web_identity" {
+  url = aws_eks_cluster.eks-cluster.identity[0].oidc[0].issuer
+}
 
-# # FARGATE PROFILE
-# resource "aws_eks_fargate_profile" "eks-cluster-fargate" {
-#   cluster_name           = aws_eks_cluster.eks-cluster.name
-#   fargate_profile_name   = "example"
-#   pod_execution_role_arn = aws_iam_role.example.arn
-#   subnet_ids             = aws_subnet.example[*].id
+resource "aws_iam_openid_connect_provider" "oidc_provider_sts" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.oidc_web_identity.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.eks-cluster.identity[0].oidc[0].issuer
+}
 
-#   selector {
-#     namespace = "example"
-#   }
+resource "aws_iam_role" "eks-vpc-cni-role" {
+  assume_role_policy = data.aws_iam_policy_document.eks-vpc-cni-role.json
+  name               = "AmazonEKSVPCCNIRole"
+}
+
+resource "aws_iam_role_policy_attachment" "eks-vpc-cni-role" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.eks-vpc-cni-role.name
+}
+
+data "aws_iam_policy_document" "eks-vpc-cni-role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.oidc_provider_sts.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-node"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.oidc_provider_sts.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+# addons
+resource "aws_eks_addon" "eks-cluster-coredns" {
+  cluster_name      = aws_eks_cluster.eks-cluster.name
+  addon_name        = "vpc-cni"
+  addon_version     = "v1.10.4-eksbuild.1"
+  resolve_conflicts = "NONE"
+  service_account_role_arn = aws_iam_role.eks-vpc-cni-role.arn
+}
+
+# resource "aws_eks_addon" "eks-cluster-coredns" {
+#   cluster_name      = aws_eks_cluster.eks-cluster.name
+#   addon_name        = "coredns"
+#   addon_version     = "v1.8.7-eksbuild.2"
+#   resolve_conflicts = "NONE"
 # }
 
 
-# # FARGATE-POD-EXECUTION-ROLE
-# data "aws_iam_policy_document" "fargate-pod-execution-role" {
-#   statement {
-#     actions = ["sts:AssumeRole"]
 
-#     condition {
-#       test     = "ArnLike"
-#       variable = "aws:SourceArn"
-#       values   = ["arn:aws:eks:${var.region_id}:${var.account_id}:fargateprofile/${var.cluster_name}-fargate/*"]
-#     }
-#     principals {
-#       type        = "Service"
-#       identifiers = ["eks-fargate-pods.amazonaws.com"]
-#     }
-#   }
-# }
+# FARGATE PROFILE
+resource "aws_eks_fargate_profile" "eks-cluster-fargate" {
+  cluster_name           = aws_eks_cluster.eks-cluster.name
+  fargate_profile_name   = "fargate-profile-${var.cluster_name}"
+  pod_execution_role_arn = aws_iam_role.fargate-pod-execution-role.arn
+  subnet_ids             = aws_subnet.private_subnet[*].id
 
-# resource "aws_iam_role" "fargate-pod-execution-role" {
-#   name               = "eksClusterRole"
-#   assume_role_policy = data.aws_iam_policy_document.fargate-pod-execution-role.json
-# }
+  # Configuration block(s) for selecting Kubernetes Pods to execute with this EKS Fargate Profile.
+  dynamic "selector" {
+    for_each = local.selectors
+    content {
+      namespace = selector.value.namespace
+      labels    = selector.value.labels
+    }
+  }
+}
 
-# resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
-#   role       = aws_iam_role.fargate-pod-execution-role.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
-# }
+# fargate pod execution role
+data "aws_iam_policy_document" "fargate-pod-execution-role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:eks:${var.region_id}:${var.account_id}:fargateprofile/${var.cluster_name}/*"]
+    }
+    principals {
+      type        = "Service"
+      identifiers = ["eks-fargate-pods.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "fargate-pod-execution-role" {
+  name               = "AmazonEKSFargatePodExecutionRole"
+  assume_role_policy = data.aws_iam_policy_document.fargate-pod-execution-role.json
+}
+
+resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
+  role       = aws_iam_role.fargate-pod-execution-role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+}
