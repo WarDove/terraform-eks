@@ -19,11 +19,5 @@ terraform {
 
 provider "aws" {
   profile = var.profile
-  region  = "eu-central-1"
+  region  = var.region
 }
-
-# provider "aws" {
-#   profile = var.profile
-#   region  = "us-east-2"
-#   alias   = "route53"
-# }
