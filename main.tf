@@ -5,7 +5,7 @@ data "aws_availability_zones" "current" {
 
 module "eks-cluster" {
   source       = "./modules/eks"
-  cluster_name = "eks-cluster"
+  cluster_name = var.cluster_name
   vpc_cidr     = "10.0.0.0/16"
   az_count     = 2
   az_names     = data.aws_availability_zones.current.names

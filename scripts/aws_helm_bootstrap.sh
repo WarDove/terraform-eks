@@ -13,10 +13,11 @@
 
 set -euo pipefail
 
-aws_account_id=$(aws sts get-caller-identity --query Account --output text)
-vpc_id=$(aws ec2 describe-vpcs | jq -r '.Vpcs[1].VpcId')
 region=eu-central-1
 cluster_name=eks-cluster
+aws_account_id=$(aws sts get-caller-identity --query Account --output text)
+vpc_id=$(aws ec2 describe-vpcs --region ${region} | jq -r '.Vpcs[1].VpcId')
+
 
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update

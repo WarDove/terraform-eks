@@ -61,11 +61,11 @@ resource "aws_eks_cluster" "eks-cluster" {
   ]
 }
 
-# log group for eks
-resource "aws_cloudwatch_log_group" "eks-cluster" {
-  name              = "/aws/eks/${var.cluster_name}/cluster"
-  retention_in_days = 7
-}
+# # log group for eks is created automatically if enabled_cluster_log_types is set on eks_cluster resource
+# resource "aws_cloudwatch_log_group" "eks-cluster" {
+#   name              = "/aws/eks/${var.cluster_name}/cluster"
+#   retention_in_days = 7
+# }
 
 # IAM Role for EKS Addon "vpc-cni" with AWS managed policy
 data "tls_certificate" "oidc_web_identity" {
