@@ -178,9 +178,9 @@ resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
 resource "aws_iam_policy" "aws-lbc-policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   description = "AWS Load Balancer Controller iam policy"
-  
+
   # Check if region is either us-east or us-west
-  policy = length(regexall("us-east.*|us-west.*","${var.region}")) > 0 ? file("${path.cwd}/iam_policies/iam_policy_us-gov.json") : file("${path.cwd}/iam_policies/iam_policy.json")
+  policy = length(regexall("us-east.*|us-west.*", "${var.region}")) > 0 ? file("${path.cwd}/iam_policies/iam_policy_us-gov.json") : file("${path.cwd}/iam_policies/iam_policy.json")
 }
 
 

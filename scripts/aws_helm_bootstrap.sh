@@ -28,7 +28,6 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set vpcId=${vpc_id} \
   --set clusterName=${cluster_name} \
   --set serviceAccount.create=false \
-  --set serviceAccount.name=aws-load-balancer-controller 
-
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set deploymentAnnotations."alb\.ingress\.kubernetes\.io/target-type"="ip" 
   kubectl get deployment -n kube-system aws-load-balancer-controller
-

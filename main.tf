@@ -9,7 +9,7 @@ module "eks-cluster" {
   vpc_cidr     = "10.0.0.0/16"
   az_count     = 2
   az_names     = data.aws_availability_zones.current.names
-  region    = data.aws_availability_zones.current.id
+  region       = data.aws_availability_zones.current.id
   account_id   = data.aws_caller_identity.current.account_id
   providers = {
     aws = aws
