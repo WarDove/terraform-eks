@@ -215,5 +215,5 @@ resource "aws_iam_role" "aws-lbc-role" {
 
 resource "aws_iam_role_policy_attachment" "aws-lbc-role" {
   policy_arn = aws_iam_policy.aws-lbc-policy.arn
-  role       = aws_iam_role.eks-vpc-cni-role.name
+  role       = aws_iam_role.aws-lbc-role.name
 }

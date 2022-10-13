@@ -1,7 +1,7 @@
 #!/bin/bash
 # pre requisites
 # AWS CLI and KUBECTL
-#https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/#install-kubectl-binary-with-curl-on-windows
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/#install-kubectl-binary-with-curl-on-windows
 
 profile="tarlan"
 region="eu-central-1"
