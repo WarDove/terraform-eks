@@ -54,7 +54,7 @@ spec:
   ingressClassName: alb
   rules:
     - host: game.huseynov.net
-    - http:
+      http:
         paths:
         - path: /
           pathType: Prefix
