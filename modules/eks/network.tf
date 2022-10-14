@@ -10,7 +10,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags = {
-    Name = "${var.cluster_name}-vpc | ${var.vpc_cidr}"
+    Name = "${var.cluster_name}-vpc"
   }
 }
 

@@ -1,6 +1,6 @@
 *.tfstate
 *.tfstate.backup
 *.tfstate.lock.info
-*.tfvars
+#*.tfvars no sensitive data in variables atm
 .idea/
 .terraform/
