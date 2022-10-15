@@ -2,7 +2,7 @@
 
 # PRE-REQUISITES:  AWS CLI, KUBECTL and GRAPHVIZ (DOT)
 # https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/#install-kubectl-binary-with-curl-on-windows
-
+# This script needs a soft link to variables.tf and terraform.tfvars filesin order to get values from terraform console
 set -euo pipefail
 
 varfile="terraform.tfvars"
