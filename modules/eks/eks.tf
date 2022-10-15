@@ -53,7 +53,7 @@ resource "aws_eks_cluster" "eks-cluster" {
     subnet_ids              = aws_subnet.private_subnet[*].id
     security_group_ids      = aws_security_group.private[*].id
     endpoint_private_access = true
-    endpoint_public_access  = true
+    endpoint_public_access  = var.public_api
   }
 
   depends_on = [
@@ -180,6 +180,7 @@ resource "aws_iam_policy" "aws-lbc-policy" {
   description = "AWS Load Balancer Controller iam policy"
 
   # Check if region is either us-east or us-west
+  # https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
   policy = length(regexall("us-east.*|us-west.*", "${var.region}")) > 0 ? file("${path.cwd}/iam_policies/iam_policy_us-gov.json") : file("${path.cwd}/iam_policies/iam_policy.json")
 }
 

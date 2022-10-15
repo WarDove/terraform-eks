@@ -79,7 +79,7 @@ terraform {
   backend "s3" {
     bucket = "${s3_bucket_name}"
     encrypt = "true"
-    key = "---insert-key-here"
+    key = "terraform.tfstate"
     dynamodb_table = "${dynamodb_table}"
     region = "${region}"
   }
