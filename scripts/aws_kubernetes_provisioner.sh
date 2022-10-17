@@ -45,7 +45,12 @@ helm_install_alc () {
     --set serviceAccount.name=aws-load-balancer-controller   
 }
 
-# Provisioner resource also removed and leaving here commented version as a snippet to alternate
+# Safe install all resources
+helm list -A | grep -q aws-load-balancer || helm_install_alc
+kubectl get sa aws-load-balancer-controller -n kube-system > /dev/null 2>&1 || create_sa_alc
+
+
+# Provisioner resource user to work with this script
 # Was provisioned on root module to start this script
 # resource "null_resource" "init-kubectl" {
 #   depends_on = [
@@ -75,9 +80,3 @@ helm_install_alc () {
 #   name              = "/aws/eks/${var.cluster_name}/cluster"
 #   retention_in_days = 7
 # }
-
-
-
-# Safe install all resources
-helm list -A | grep -q aws-load-balancer || helm_install_alc
-kubectl get sa aws-load-balancer-controller -n kube-system > /dev/null 2>&1 || create_sa_alc

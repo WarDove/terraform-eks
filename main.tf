@@ -22,8 +22,8 @@ module "eks-cluster" {
   source               = "./modules/eks"
   cluster_name         = var.cluster_name
   public_api           = true
-  load_balancer        = true
-  fargate_only_cluster = true
+  load_balancer        = false
+  fargate_only_cluster = false
   fargate_profiles     = local.fargate_profiles
   vpc_cidr             = "10.0.0.0/16"
   az_count             = 2
@@ -33,8 +33,13 @@ module "eks-cluster" {
   profile              = var.profile
 
   providers = {
-    aws   = aws
-    utils = utils
-    helm  = helm
+    aws        = aws
+    utils      = utils
+    helm       = helm
+    kubernetes = kubernetes
   }
 }
+
+# TODO: Implement Vertical and Horizontal auto scaling
+# TODO: Add ec2 node groups with some logic 
+# TODO: Bootstrap the patch of coredns with terraform configuration "kubernetes_manifest"
