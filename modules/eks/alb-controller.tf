@@ -1,16 +1,17 @@
 # Create Service account with respective annotations and labels for aws load balancer controller
 resource "kubernetes_service_account" "aws-lbc" {
+  count = var.load_balancer ? 1 : 0
   metadata {
-    name = "aws-load-balancer-controller"
+    name      = "aws-load-balancer-controller"
     namespace = "kube-system"
     labels = {
       "app.kubernetes.io/component" = "controller",
-      "app.kubernetes.io/name" = "aws-load-balancer-controller"
+      "app.kubernetes.io/name"      = "aws-load-balancer-controller"
     }
     annotations = {
       "eks.amazonaws.com/role-arn" = "arn:aws:iam::${var.account_id}:role/${aws_iam_role.aws-lbc-role.name}"
     }
-  } 
+  }
 }
 
 # Bootstrap aws load balancer controller with helm chart
@@ -24,7 +25,6 @@ resource "helm_release" "aws-lbc-chart" {
 
   depends_on = [
     data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig,
-    aws_eks_fargate_profile.eks-cluster-fargate,
     kubernetes_service_account.aws-lbc
   ]
 

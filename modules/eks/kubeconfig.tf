@@ -14,15 +14,13 @@ data "utils_aws_eks_update_kubeconfig" "bootstrap-kubeconfig" {
 }
 
 resource "null_resource" "patch-coredns" {
-  count = var.fargate_only_cluster ? 1 : 0
-
   depends_on = [
     data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig,
-    aws_eks_fargate_profile.eks-cluster-fargate
   ]
 
   triggers = {
-    api_endpoint_up = aws_eks_cluster.eks-cluster.endpoint
+    api_endpoint_up      = aws_eks_cluster.eks-cluster.endpoint
+    fargate_only_changed = "${var.fargate_only_cluster}"
   }
 
   provisioner "local-exec" {
@@ -31,5 +29,8 @@ resource "null_resource" "patch-coredns" {
     # Use interpreter "bash" on windows if you have installed git-bash.
     # On linux no entrypoint needed or you may enter "/bin/bash" 
     interpreter = ["bash"]
+    environment = {
+      FARGATE_ONLY = var.fargate_only_cluster
+    }
   }
 }
