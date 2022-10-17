@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-# check if ec2 is set for compute type in annotations of coredns
+check if ec2 is set for compute type in annotations of coredns
 EC2_COMPUTE_TYPE="$(kubectl get deploy coredns -n kube-system -o json | jq -r '.spec.template.metadata.annotations["eks.amazonaws.com/compute-type"]')"
 
 if [[ "$EC2_COMPUTE_TYPE" != "null" ]]; then
@@ -32,7 +32,7 @@ metadata:
 EOT
 }
 
-# Deploy AWS Load Balancer Controller with Helm chartget
+# Deploy AWS Load Balancer Controller with Helm chart
 helm_install_alc () {
   helm repo add eks https://aws.github.io/eks-charts
   helm repo update
@@ -44,6 +44,39 @@ helm_install_alc () {
     --set serviceAccount.create=false \
     --set serviceAccount.name=aws-load-balancer-controller   
 }
+
+# Provisioner resource also removed and leaving here commented version as a snippet to alternate
+# Was provisioned on root module to start this script
+# resource "null_resource" "init-kubectl" {
+#   depends_on = [
+#     module.eks-cluster.kubeconfig
+#   ]
+#   triggers = {
+#     api_endpoint_up = module.eks-cluster.kube_api_endpoint
+#   }
+#   provisioner "local-exec" {
+#     working_dir = "${path.cwd}/scripts"
+#     command     = "./aws_kubernetes_provisioner.sh"
+#     # Use interpreter "bash" on windows if you have installed git-bash.
+#     # On linux no entrypoint needed or you may enter "/bin/bash" 
+#     interpreter = ["bash"]
+#     environment = {
+#       REGION       = local.region
+#       ACCOUNT_ID   = local.account_id
+#       CLUSTER_NAME = var.cluster_name
+#       VPC_ID       = module.eks-cluster.cluster-vpc.id
+#     }
+#   }
+# }
+
+
+# # log group for eks is created automatically if enabled_cluster_log_types is set on eks_cluster resource so saving here as snippet
+# resource "aws_cloudwatch_log_group" "eks-cluster" {
+#   name              = "/aws/eks/${var.cluster_name}/cluster"
+#   retention_in_days = 7
+# }
+
+
 
 # Safe install all resources
 helm list -A | grep -q aws-load-balancer || helm_install_alc

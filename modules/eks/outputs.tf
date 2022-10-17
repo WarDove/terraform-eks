@@ -9,3 +9,11 @@ output "kubeconfig-certificate-authority-data" {
 output "cluster-vpc" {
   value = aws_vpc.main
 }
+
+output "kubeconfig" {
+  value = data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig
+}
+
+
+
+
