@@ -41,10 +41,5 @@ module "eks-cluster" {
 }
 
 # TODO: Implement Vertical and Horizontal auto scaling
-<<<<<<< HEAD
-# TODO: Add ec2 node groups with some logic 
-# TODO: Bootstrap the patch of coredns with terraform configuration "kubernetes_manifest"
-# TODO: Gitlab runners on kubernetes
-=======
 # TODO: Add ec2 node groups with some logic
->>>>>>> 9f8e249a32beb147b9c3b8932a1fa06b5fb0b512
+
