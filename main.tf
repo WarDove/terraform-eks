@@ -22,8 +22,8 @@ module "eks-cluster" {
   source               = "./modules/eks"
   cluster_name         = var.cluster_name
   public_api           = true
-  load_balancer        = false
-  fargate_only_cluster = false
+  load_balancer        = true
+  fargate_only_cluster = true
   fargate_profiles     = local.fargate_profiles
   vpc_cidr             = "10.0.0.0/16"
   az_count             = 2
