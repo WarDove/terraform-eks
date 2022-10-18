@@ -15,11 +15,19 @@ data "utils_aws_eks_update_kubeconfig" "bootstrap-kubeconfig" {
 
 resource "null_resource" "patch-coredns" {
   depends_on = [
+<<<<<<< HEAD
     data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig,
   ]
 
   triggers = {
     api_endpoint_up      = aws_eks_cluster.eks-cluster.endpoint
+=======
+    data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig,    
+  ]
+
+  triggers = {
+    api_endpoint_up = aws_eks_cluster.eks-cluster.endpoint
+>>>>>>> origin/master
     fargate_only_changed = "${var.fargate_only_cluster}"
   }
 
