@@ -19,7 +19,7 @@ locals {
 
 # Provision an EKS cluster
 module "eks-cluster" {
-  source               = "./modules/eks"
+  source               = "./modules/eks-cluster"
   cluster_name         = var.cluster_name
   public_api           = true
   load_balancer        = true
@@ -37,6 +37,20 @@ module "eks-cluster" {
     utils      = utils
     helm       = helm
     kubernetes = kubernetes
+  }
+}
+
+module "gitlab-instance" {
+  source          = "./modules/gitlab-instance"
+  subnet_type = "public" # public or private
+  gitlab-version  = "15.4.2"
+  instance_type   = "t3.micro"
+  volume_size     = 10
+  vpc           = module.eks-cluster.cluster-vpc
+  subnet_ids      = local.cluster_subnet_ids
+
+  providers = {
+    aws = aws
   }
 }
 

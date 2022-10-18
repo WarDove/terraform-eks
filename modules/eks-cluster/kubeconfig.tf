@@ -28,7 +28,7 @@ resource "null_resource" "patch-coredns" {
 
   triggers = {
     api_endpoint_up = aws_eks_cluster.eks-cluster.endpoint
-    fargate_only = var.fargate_only_cluster
+    fargate_only    = var.fargate_only_cluster
   }
 
   provisioner "local-exec" {

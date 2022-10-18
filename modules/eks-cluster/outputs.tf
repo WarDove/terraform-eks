@@ -10,8 +10,12 @@ output "cluster-vpc" {
   value = aws_vpc.main
 }
 
-output "kubeconfig" {
-  value = data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig
+output "cluster-public-subnet-ids" {
+  value = aws_subnet.private_subnet[*].id
+}
+
+output "cluster-private-subnet-ids" {
+  value = aws_subnet.public_subnet[*].id
 }
 
 

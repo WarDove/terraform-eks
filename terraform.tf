@@ -20,7 +20,8 @@ terraform {
       version = "~> 2.14"
     }
   }
-  required_version = ">= 0.14.9"
+
+  required_version = ">=1.2.8"
 
   backend "s3" {
     bucket         = "gitlab-poc-terraform-eu-central-1"
