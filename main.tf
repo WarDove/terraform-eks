@@ -1,5 +1,5 @@
 # This local holds a map in which fargate profile names are the keys, and fargate
-# selectors per profile are in the value as a list of objecs you can have multiple 
+# selectors per profile are in the value as a list of objects you can have multiple
 # selectors per profile (profile list items containing namespace and label)
 # Leave it empty or comment the value of the local if you don't need fargate profiles
 locals {
