@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: default
+  name: nginx
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: test-group
+    alb.ingress.kubernetes.io/group.order: '100' #this sets the rule priority as mentioned in the official documentation. so if no specific host is set (if host = * ) then it will forward according to this priority - lowest number higher priority, if numbers are equal it is evaluated by the lexical order of namespace and name
+spec:
+  ingressClassName: alb
+  rules:
+    - host: nginx.huseynov.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80
+...

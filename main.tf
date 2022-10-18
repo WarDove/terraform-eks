@@ -22,8 +22,8 @@ module "eks-cluster" {
   source               = "./modules/eks"
   cluster_name         = var.cluster_name
   public_api           = true
-  load_balancer        = false
-  fargate_only_cluster = false
+  load_balancer        = true
+  fargate_only_cluster = true
   fargate_profiles     = local.fargate_profiles
   vpc_cidr             = "10.0.0.0/16"
   az_count             = 2
@@ -41,6 +41,10 @@ module "eks-cluster" {
 }
 
 # TODO: Implement Vertical and Horizontal auto scaling
+<<<<<<< HEAD
 # TODO: Add ec2 node groups with some logic 
 # TODO: Bootstrap the patch of coredns with terraform configuration "kubernetes_manifest"
 # TODO: Gitlab runners on kubernetes
+=======
+# TODO: Add ec2 node groups with some logic
+>>>>>>> 9f8e249a32beb147b9c3b8932a1fa06b5fb0b512
