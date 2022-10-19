@@ -36,11 +36,14 @@ resource "aws_security_group" "gitlab" {
   description = "Security group for Gitlab Instance"
   vpc_id      = var.vpc.id
 
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = [var.vpc.cidr_block]
+  dynamic "ingress" {
+    for_each = local.gitlab_ingress
+    content {
+      from_port   = ingress.value.from
+      to_port     = ingress.value.to
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
   }
 
   egress {

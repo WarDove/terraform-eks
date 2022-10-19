@@ -42,11 +42,12 @@ module "eks-cluster" {
 
 module "gitlab-instance" {
   source          = "./modules/gitlab-instance"
-  subnet_type = "public" # public or private
+  subnet_type     = "public" # public or private
   gitlab-version  = "15.4.2"
   instance_type   = "t3.micro"
   volume_size     = 10
-  vpc           = module.eks-cluster.cluster-vpc
+  ssh_cidr_blocks = [] # ssh access allowed to these cidr blocks
+  vpc             = module.eks-cluster.cluster-vpc
   subnet_ids      = local.cluster_subnet_ids
 
   providers = {

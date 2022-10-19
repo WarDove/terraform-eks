@@ -10,7 +10,7 @@ locals {
 
 
   cluster_subnet_ids = {
-    private = module.eks-cluster.cluster-public-subnet-ids,
+    private = module.eks-cluster.cluster-public-subnet-ids
     public  = module.eks-cluster.cluster-private-subnet-ids
   }
 
