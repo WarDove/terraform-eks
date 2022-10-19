@@ -1,5 +1,6 @@
 locals {
   private_hosted_zone = var.vpc_id != "none"
+  zone_id             = var.created_manually ? join("", data.aws_route53_zone.main[*].id) : join("", resource.aws_route53_zone.main[*].id)
 }
 
 data "aws_route53_zone" "main" {

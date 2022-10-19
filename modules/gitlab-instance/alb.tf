@@ -35,16 +35,15 @@ resource "aws_security_group" "alb" {
 
   tags = {
     Name        = "gitlab-instance-alb-sg"
-    Environment = var.env
   }
 }
 
 resource "aws_lb" "main" {
   count                      = local.alb ? 1 : 0
   name                       = "gitlab-instance-alb"
-  internal                   = var.internal_alb
+  internal                   = local.internal_alb
   load_balancer_type         = "application"
-  security_groups            = [aws_security_group.alb.id]
+  security_groups            = aws_security_group.alb[*].id
   subnets                    = local.subnet_ids
   enable_deletion_protection = false
 
@@ -77,8 +76,8 @@ resource "aws_alb_target_group" "main" {
 }
 
 # HTTP only listener
-resource "aws_alb_listener" "http" {
-  count             = local.alb
+resource "aws_alb_listener" "http_only" {
+  count             = local.alb ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 80
   protocol          = "HTTP"
