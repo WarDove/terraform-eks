@@ -1,6 +1,5 @@
 locals {
-  private_hosted_zone = length(var.vpc_id) > 0
-  zone_id             = var.created_manually ? data.aws_route53_zone.main.*.id[0] : resource.aws_route53_zone.main.*.id[0]
+  private_hosted_zone = var.vpc_id != "none"
 }
 
 data "aws_route53_zone" "main" {
@@ -54,5 +53,3 @@ resource "aws_acm_certificate_validation" "cert_validation" {
   certificate_arn         = aws_acm_certificate.main.*.arn[0]
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
-
-

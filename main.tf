@@ -17,20 +17,43 @@ locals {
   }
 }
 
+# Declare your hosted zone and create certificates via ACM if needed
 module "huseynov-net" {
-  source   = "./modules/hosted-zone"
-  dns_zone = "huseynov.net"
-  # enter vpc_id if the hosted zone has to be private, otherwise leave empty
-  vpc_id           = ""
+  source = "./modules/hosted-zone"
+  # should be apex domain
+  dns_zone         = "huseynov.net"
   tls_termination  = true
   created_manually = true
+  # Hosted zone will be private if VPC id entered
+  # Possible values are "none" or a valid VPC id
+  vpc_id = "none"
+
   providers = {
     aws = aws
   }
-
 }
 
+# Provision a gitlab instance in AWS
+module "gitlab-instance" {
+  source         = "./modules/gitlab-instance"
+  subnet_type    = "public" # public or private
+  gitlab-version = "15.4.2"
+  instance_type  = "t3.micro"
+  volume_size    = 10
+  # list of cidr block with ssh access to instance
+  ssh_cidr_blocks = []
+  vpc             = module.eks-cluster.cluster-vpc
+  subnet_ids      = local.cluster_subnet_ids
+  # Possible values are "none", "internal" or "external"
+  alb = "external"
+  # Enter certificate arn to enable https listener and http -> https redirect
+  # Possible values are "none" or a valid certificate arn
+  certificate_arn = module.huseynov-net.certificate_arn
 
+  providers = {
+    aws = aws
+  }
+}
 
 # Provision an EKS cluster
 module "eks-cluster" {
@@ -55,21 +78,9 @@ module "eks-cluster" {
   }
 }
 
-module "gitlab-instance" {
-  source          = "./modules/gitlab-instance"
-  subnet_type     = "public" # public or private
-  gitlab-version  = "15.4.2"
-  instance_type   = "t3.micro"
-  volume_size     = 10
-  ssh_cidr_blocks = [] # ssh access allowed to these cidr blocks
-  vpc             = module.eks-cluster.cluster-vpc
-  subnet_ids      = local.cluster_subnet_ids
 
-  providers = {
-    aws = aws
-  }
-}
 
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
+# TODO: AWS backups integrate with gitlab instance
 

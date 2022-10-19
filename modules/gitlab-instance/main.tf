@@ -1,3 +1,8 @@
+locals {
+  subnet_ids = var.subnet_ids[var.subnet_type]
+
+}
+
 data "aws_ami" "gitlab-ce" {
   most_recent = false
   owners      = ["679593333241"]
@@ -13,7 +18,7 @@ resource "aws_instance" "gitlab" {
   ami                    = data.aws_ami.gitlab-ce.id
   instance_type          = var.instance_type
   vpc_security_group_ids = []
-  subnet_id              = var.subnet_ids[var.subnet_type][0]
+  subnet_id              = local.subnet_ids[0]
 
   root_block_device {
     volume_size = var.volume_size
@@ -27,7 +32,8 @@ resource "aws_instance" "gitlab" {
   key_name = aws_key_pair.gitlab.id
 
   tags = {
-    Name = "gitlab-${var.gitlab-version}"
+    Name    = "gitlab-${var.gitlab-version}"
+    version = data.aws_ami.gitlab-ce.name_regex
   }
 }
 
@@ -51,5 +57,9 @@ resource "aws_security_group" "gitlab" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "gitlab-instance"
   }
 }
