@@ -17,6 +17,21 @@ locals {
   }
 }
 
+module "huseynov-net" {
+  source          = "./modules/hosted-zone"
+  dns_zone        = "huseynov.net"
+  # enter vpc_id if the hosted zone has to be private, otherwise leave empty
+  vpc_id = ""
+  tls_termination = true
+  created_manually = true
+  providers = {
+    aws = aws
+  }
+
+}
+
+
+
 # Provision an EKS cluster
 module "eks-cluster" {
   source               = "./modules/eks-cluster"
@@ -55,6 +70,6 @@ module "gitlab-instance" {
   }
 }
 
-# TODO: Implement Vertical and Horizontal auto scaling
-# TODO: Add ec2 node groups with some logic
+# TODO: Implement Vertical and Horizontal auto scaling with eks module
+# TODO: Add ec2 node groups with some logic to eks module
 
