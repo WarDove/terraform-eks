@@ -18,11 +18,6 @@ variable "certificate_arn" {
     condition     = can(regex("^arn:aws:acm:", var.certificate_arn)) || var.certificate_arn == "none"
     error_message = "Invalid input: Possible values are \"none\" or a valid certificate arn"
   }
-
-  validation {
-    condition     = var.tls_termination == true && var.certificate_arn != "none"
-    error_message = "Invalid input: TLS termination is on, certificate cannot be set to \"none\""
-  }
 }
 
 variable "alb" {

@@ -1,6 +1,6 @@
 locals {
-  internal_alb    = var.alb == "internal"
-  alb             = var.alb != "none"
+  internal_alb = var.alb == "internal"
+  alb          = var.alb != "none"
 }
 
 resource "aws_security_group" "alb" {
@@ -33,7 +33,7 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name        = "gitlab-instance-alb-sg"
+    Name = "gitlab-instance-alb-sg"
   }
 }
 
@@ -89,7 +89,7 @@ resource "aws_alb_listener" "http_only" {
 
 # HTTPS
 resource "aws_alb_listener" "http" {
-  count             = local.alb && local.tls_termination ? 1 : 0
+  count             = local.alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 80
   protocol          = "HTTP"
@@ -107,7 +107,7 @@ resource "aws_alb_listener" "http" {
 
 # HTTP to HTTPS redirect
 resource "aws_alb_listener" "https" {
-  count             = local.alb && local.tls_termination ? 1 : 0
+  count             = local.alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 443
   protocol          = "HTTPS"
@@ -118,5 +118,12 @@ resource "aws_alb_listener" "https" {
   default_action {
     target_group_arn = aws_alb_target_group.main[0].id
     type             = "forward"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.tls_termination == true && var.certificate_arn != "none"
+      error_message = "Invalid input: TLS termination is on, certificate cannot be set to \"none\""
+    }
   }
 }
