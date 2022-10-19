@@ -18,11 +18,11 @@ locals {
 }
 
 module "huseynov-net" {
-  source          = "./modules/hosted-zone"
-  dns_zone        = "huseynov.net"
+  source   = "./modules/hosted-zone"
+  dns_zone = "huseynov.net"
   # enter vpc_id if the hosted zone has to be private, otherwise leave empty
-  vpc_id = ""
-  tls_termination = true
+  vpc_id           = ""
+  tls_termination  = true
   created_manually = true
   providers = {
     aws = aws

@@ -1,6 +1,6 @@
 locals {
   private_hosted_zone = length(var.vpc_id) > 0
-  zone_id = var.created_manually ? data.aws_route53_zone.main.*.id[0] : resource.aws_route53_zone.main.*.id[0]
+  zone_id             = var.created_manually ? data.aws_route53_zone.main.*.id[0] : resource.aws_route53_zone.main.*.id[0]
 }
 
 data "aws_route53_zone" "main" {
