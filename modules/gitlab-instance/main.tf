@@ -1,6 +1,5 @@
 locals {
   subnet_ids = var.subnet_ids[var.subnet_type]
-
 }
 
 data "aws_ami" "gitlab-ce" {

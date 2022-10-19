@@ -5,6 +5,9 @@ variable "volume_size" {}
 variable "subnet_ids" {}
 variable "subnet_type" {}
 variable "ssh_cidr_blocks" {}
+variable "tls_termination" {
+  default = false
+}
 
 variable "certificate_arn" {
   default     = "none"
@@ -14,6 +17,11 @@ variable "certificate_arn" {
   validation {
     condition     = can(regex("^arn:aws:acm:", var.certificate_arn)) || var.certificate_arn == "none"
     error_message = "Invalid input: Possible values are \"none\" or a valid certificate arn"
+  }
+
+  validation {
+    condition     = var.tls_termination == true && var.certificate_arn != "none"
+    error_message = "Invalid input: TLS termination is on, certificate cannot be set to \"none\""
   }
 }
 

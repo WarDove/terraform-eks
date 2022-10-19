@@ -46,8 +46,10 @@ module "gitlab-instance" {
   subnet_ids      = local.cluster_subnet_ids
   # Possible values are "none", "internal" or "external"
   alb = "external"
+  tls_termination  = true
   # Enter certificate arn to enable https listener and http -> https redirect
   # Possible values are "none" or a valid certificate arn
+  # Cannot be set to "none" if tls_termination is true
   certificate_arn = module.huseynov-net.certificate_arn
 
   providers = {

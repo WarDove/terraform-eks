@@ -1,7 +1,6 @@
 locals {
   internal_alb    = var.alb == "internal"
   alb             = var.alb != "none"
-  tls_termination = var.certificate_arn != "none"
 }
 
 resource "aws_security_group" "alb" {
