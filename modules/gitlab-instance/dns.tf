@@ -21,7 +21,6 @@ data "aws_route53_zone" "main" {
       error_message = "Private instance shouldn't have a record in a public dns zone!"
     }
   }
-
 }
 
 resource "aws_route53_record" "alb_record" {

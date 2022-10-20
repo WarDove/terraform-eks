@@ -29,10 +29,13 @@ resource "aws_key_pair" "gitlab" {
 }
 
 resource "aws_instance" "gitlab" {
-  ami                    = data.aws_ami.gitlab-ce.id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.gitlab.id]
-  subnet_id              = local.subnet_ids[0]
+  ami                         = data.aws_ami.gitlab-ce.id
+  instance_type               = var.instance_type
+  vpc_security_group_ids      = [aws_security_group.gitlab.id]
+  subnet_id                   = local.subnet_ids[0]
+  disable_api_termination     = true
+  disable_api_stop            = true
+  user_data_replace_on_change = false
 
   root_block_device {
     volume_size = var.volume_size
@@ -44,6 +47,10 @@ resource "aws_instance" "gitlab" {
   })
 
   key_name = aws_key_pair.gitlab.id
+
+  lifecycle {
+    prevent_destroy = true
+  }
 
   tags = {
     Name    = "gitlab-${var.gitlab-version}"
