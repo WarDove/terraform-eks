@@ -50,6 +50,7 @@ resource "aws_instance" "main" {
   key_name = aws_key_pair.main.id
 
   lifecycle {
+    ignore_changes = [user_data]
     prevent_destroy = true
   }
 
