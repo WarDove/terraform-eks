@@ -1,6 +1,3 @@
-locals {
-  subnet_ids = var.subnet_ids[var.subnet_type]
-}
 
 data "aws_ami" "gitlab-ce" {
   most_recent = false
@@ -16,7 +13,7 @@ resource "aws_key_pair" "gitlab" {
 resource "aws_instance" "gitlab" {
   ami                    = data.aws_ami.gitlab-ce.id
   instance_type          = var.instance_type
-  vpc_security_group_ids = []
+  vpc_security_group_ids = ["185.96.126.106/32"]
   subnet_id              = local.subnet_ids[0]
 
   root_block_device {

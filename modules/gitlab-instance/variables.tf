@@ -2,9 +2,20 @@ variable "instance_type" {}
 variable "vpc" {}
 variable "gitlab-version" {}
 variable "volume_size" {}
-variable "subnet_ids" {}
-variable "subnet_type" {}
 variable "ssh_cidr_blocks" {}
+variable "subnet_ids" {}
+
+variable "subnet_type" {
+  default     = "none"
+  type        = string
+  description = "Certificate arn to enable tls termination - also can be set to none"
+
+  validation {
+    condition     = var.subnet_type == "private" || var.subnet_type == "public"
+    error_message = "Invalid input: Possible values are \"private\" or \"public\""
+  }
+}
+
 variable "tls_termination" {
   default = false
 }

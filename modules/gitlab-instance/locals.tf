@@ -31,4 +31,9 @@ locals {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+
+  subnet_ids   = var.subnet_ids[var.subnet_type]
+  internal_alb = var.alb == "internal"
+  create_alb   = var.alb != "none"
+  allocate_eip = var.subnet_type == "public" && var.alb == "none"
 }
