@@ -12,7 +12,7 @@ terraform {
 
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.7"
+      version = "= 2.5.1"
     }
 
     kubernetes = {
@@ -46,5 +46,4 @@ provider "helm" {
 
 provider "kubernetes" {
   config_path = "~/.kube/config"
-  #config_context = "default"
 }
