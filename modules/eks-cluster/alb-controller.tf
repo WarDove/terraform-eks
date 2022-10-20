@@ -1,6 +1,11 @@
 # Create Service account with respective annotations and labels for aws load balancer controller
 resource "kubernetes_service_account" "aws-lbc" {
   count = var.load_balancer ? 1 : 0
+
+    depends_on = [
+      data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig
+  ]
+
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
@@ -24,7 +29,6 @@ resource "helm_release" "aws-lbc-chart" {
   namespace  = "kube-system"
 
   depends_on = [
-    data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig,
     kubernetes_service_account.aws-lbc
   ]
 

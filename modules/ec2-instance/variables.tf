@@ -1,6 +1,7 @@
 variable "instance_type" {}
 variable "vpc" {}
 variable "name" {}
+variable "ami_owners" {}
 variable "ami_regex" {}
 variable "volume_size" {}
 variable "external_ssh" {}

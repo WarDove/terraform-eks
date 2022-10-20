@@ -1,23 +1,4 @@
-# This local holds a map in which fargate profile names are the keys, and fargate
-# selectors per profile are in the value as a list of objects you can have multiple
-# selectors per profile (profile list items containing namespace and label)
-# Leave it empty or comment the value of the local if you don't need fargate profiles
-locals {
-  fargate_profiles = {
-
-    profile-1 = [
-      { namespace = "default",
-      labels = {} }
-    ],
-
-    profile-2 = [
-      { namespace = "my-namespace",
-      labels = {} }
-    ]
-  }
-}
-
-# Declare your hosted zone and create certificates via ACM if needed
+# Declare your hosted zone and create certificates via ACM
 module "huseynov-net" {
   source = "./modules/hosted-zone"
   # This should be set as an apex domain
@@ -39,7 +20,8 @@ module "huseynov-net" {
 module "gitlab-instance" {
   source = "./modules/ec2-instance"
   name   = "ubuntu"
-  ami_regex = ""
+  ami_owners = ["099720109477"]
+  ami_regex = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220610"
   instance_type    = "t2.nano"
   volume_size      = 10
   encrypted_volume = false
@@ -49,7 +31,7 @@ module "gitlab-instance" {
   vpc          = module.eks-cluster.cluster-vpc
   subnet_ids   = local.cluster_subnet_ids
   # Possible values are "private" or "public"
-  subnet_type = "private"
+  subnet_type = "public"
   # Possible values are "none", "internal" or "external"
   # If alb set to "none" and subnet_type is set to public
   # EIP will be allocated and associated with instance
@@ -100,7 +82,7 @@ module "eks-cluster" {
   }
 }
 
-# TODO: Change gitlab naming to ec2 for the module
+# TODO: implement automated Gitlab installation and configuration
 # TODO: Gitlab outputs
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module

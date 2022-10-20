@@ -1,7 +1,7 @@
 
 data "aws_ami" "main" {
   most_recent = false
-  owners      = ["679593333241"]
+  owners      = var.ami_owners
   name_regex  = var.ami_regex
 
   # As this data block doesn't depend on any variable and will be created
