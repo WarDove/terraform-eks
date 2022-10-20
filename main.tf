@@ -40,23 +40,24 @@ module "gitlab-instance" {
   instance_type  = "t3.micro"
   volume_size    = 10
   # list of cidr block with ssh access to instance
-  ssh_cidr_blocks = []
+  ssh_cidr_blocks = ["185.96.126.106/32"]
   vpc             = module.eks-cluster.cluster-vpc
   subnet_ids      = local.cluster_subnet_ids
   # Possible values are "private" or "public"
-  subnet_type = "public"
+  subnet_type = "private"
   # Possible values are "none", "internal" or "external"
   # If alb set to "none" and subnet_type is set to public
   # EIP will be allocated and associated with instance
-  alb = "external"
+  alb = "none"
   # Enter certificate arn to enable https listener and http -> https redirect
   # Possible values are "none" or a valid certificate arn
-  # Cannot be set to "none" if tls_termination is true
-  tls_termination = true
+  # If not set to "none" tls_termination must be turned on
+  # If alb is set to "none" then certificate_arn must be set to "none" or omitted.
   certificate_arn = module.huseynov-net.certificate_arn
+  tls_termination = true
   # Possible values are "none" or a valid subdomain
   # If not set to "none" hosted_zone_id must be set as well
-  subdomain      = "none"
+  subdomain = "none"
   # Possible values are "none" or a valid hosted zone id
   # If not set to "none" subdomain must be set as well
   hosted_zone_id = "none"

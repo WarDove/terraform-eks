@@ -53,6 +53,7 @@ resource "aws_alb_target_group" "main" {
   protocol    = "HTTP"
   vpc_id      = var.vpc.id
   target_type = "instance"
+  depends_on  = [aws_lb.main]
 
   health_check {
     healthy_threshold   = "3"
@@ -113,13 +114,6 @@ resource "aws_alb_listener" "https" {
   default_action {
     target_group_arn = aws_alb_target_group.main[0].id
     type             = "forward"
-  }
-
-  lifecycle {
-    precondition {
-      condition     = var.tls_termination == true && var.certificate_arn != "none"
-      error_message = "Invalid input: TLS termination is on, certificate cannot be set to \"none\""
-    }
   }
 }
 
