@@ -1,6 +1,6 @@
 resource "aws_security_group" "alb" {
   count  = local.create_alb ? 1 : 0
-  name   = "gitlab-instance-alb-sg"
+  name   = "${var.name}-alb-sg"
   vpc_id = var.vpc.id
 
   ingress {
@@ -28,13 +28,13 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name = "gitlab-instance-alb-sg"
+    Name = "${var.name}-instance-alb-sg"
   }
 }
 
 resource "aws_lb" "main" {
   count                      = local.create_alb ? 1 : 0
-  name                       = "gitlab-instance-alb"
+  name                       = "${var.name}-instance-alb"
   internal                   = local.internal_alb
   load_balancer_type         = "application"
   security_groups            = aws_security_group.alb[*].id
@@ -42,13 +42,13 @@ resource "aws_lb" "main" {
   enable_deletion_protection = false
 
   tags = {
-    Name = "gitlab-instance-alb"
+    Name = "${var.name}-instance-alb"
   }
 }
 
 resource "aws_alb_target_group" "main" {
   count       = local.create_alb ? 1 : 0
-  name        = "gitlab-instance"
+  name        = "${var.name}-instance"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = var.vpc.id
@@ -66,14 +66,14 @@ resource "aws_alb_target_group" "main" {
   }
 
   tags = {
-    Name = "gitlab-instance"
+    Name = "${var.name}-instance"
   }
 }
 
 resource "aws_lb_target_group_attachment" "main" {
   count            = local.create_alb ? 1 : 0
   target_group_arn = aws_alb_target_group.main[0].arn
-  target_id        = aws_instance.gitlab.id
+  target_id        = aws_instance.main.id
   port             = 80
 }
 
@@ -127,9 +127,9 @@ resource "aws_alb_listener" "https" {
 # If subnet is public and no alb created then eip will be allocated
 resource "aws_eip" "instance_eip" {
   count    = local.allocate_eip ? 1 : 0
-  instance = aws_instance.gitlab.id
+  instance = aws_instance.main.id
   vpc      = true
   tags = {
-    Name = "gitlab-instance"
+    Name = "${var.name}-instance"
   }
 }

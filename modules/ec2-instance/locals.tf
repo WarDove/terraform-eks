@@ -1,5 +1,5 @@
 locals {
-  gitlab_ingress = [
+  instance_ingress = [
     {
       from        = 0
       to          = 0

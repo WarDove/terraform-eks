@@ -37,11 +37,9 @@ module "huseynov-net" {
 
 # Provision a gitlab instance in AWS
 module "gitlab-instance" {
-  source         = "./modules/gitlab-instance"
-  gitlab-version = "15.4.2"
-  # Instance type can be updated in place but will require restart.
-  # Supported instance types for gitlab-ce
-  # https://aws.amazon.com/marketplace/pp/prodview-w6ykryurkesjq
+  source = "./modules/ec2-instance"
+  name   = "ubuntu"
+  ami_regex = ""
   instance_type    = "t2.nano"
   volume_size      = 10
   encrypted_volume = false
@@ -102,6 +100,7 @@ module "eks-cluster" {
   }
 }
 
+# TODO: Change gitlab naming to ec2 for the module
 # TODO: Gitlab outputs
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module

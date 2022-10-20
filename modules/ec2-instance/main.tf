@@ -1,8 +1,8 @@
 
-data "aws_ami" "gitlab-ce" {
+data "aws_ami" "main" {
   most_recent = false
   owners      = ["679593333241"]
-  name_regex  = "GitLab CE ${var.gitlab-version}"
+  name_regex  = var.ami_regex
 
   # As this data block doesn't depend on any variable and will be created
   # if syntax is valid, placing this precondition to be evaluated in this block
@@ -23,15 +23,15 @@ data "aws_ami" "gitlab-ce" {
   }
 }
 
-resource "aws_key_pair" "gitlab" {
-  key_name   = "gitlab"
+resource "aws_key_pair" "main" {
+  key_name   = "${var.name}-instance-key"
   public_key = file("${path.module}/public-key/id_rsa.pub")
 }
 
-resource "aws_instance" "gitlab" {
-  ami                    = data.aws_ami.gitlab-ce.id
+resource "aws_instance" "main" {
+  ami                    = data.aws_ami.main.id
   instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.gitlab.id]
+  vpc_security_group_ids = [aws_security_group.main.id]
   subnet_id              = local.subnet_ids[0]
   #disable_api_termination     = true
   #disable_api_stop            = true
@@ -44,28 +44,28 @@ resource "aws_instance" "gitlab" {
 
   user_data = templatefile("${path.module}/userdata.tpl",
     {
-      nodename = "gitlab-${var.gitlab-version}"
+      nodename = "${var.name}-instance"
   })
 
-  key_name = aws_key_pair.gitlab.id
+  key_name = aws_key_pair.main.id
 
   lifecycle {
     prevent_destroy = true
   }
 
   tags = {
-    Name    = "gitlab-${var.gitlab-version}"
-    version = data.aws_ami.gitlab-ce.name_regex
+    Name    = "${var.name}"
+    version = data.aws_ami.main.name_regex
   }
 }
 
-resource "aws_security_group" "gitlab" {
-  name        = "gitlab-instance-sg"
-  description = "Security group for Gitlab Instance"
+resource "aws_security_group" "main" {
+  name        = "${var.name}-instance-sg"
+  description = "Security group for ${var.name} Instance"
   vpc_id      = var.vpc.id
 
   dynamic "ingress" {
-    for_each = local.gitlab_ingress
+    for_each = local.instance_ingress
     content {
       from_port   = ingress.value.from
       to_port     = ingress.value.to
@@ -92,6 +92,6 @@ resource "aws_security_group" "gitlab" {
   }
 
   tags = {
-    Name = "gitlab-instance"
+    Name = "${var.name}-instance-sg"
   }
 }
