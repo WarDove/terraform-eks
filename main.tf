@@ -20,8 +20,10 @@ locals {
 # Declare your hosted zone and create certificates via ACM if needed
 module "huseynov-net" {
   source = "./modules/hosted-zone"
-  # should be apex domain
-  dns_zone         = "huseynov.net"
+  # This should be set as an apex domain
+  dns_zone = "huseynov.net"
+  # Set tls_termination to true if you want to create an ACM certificate
+  # with wildcard included in sans.
   tls_termination  = true
   created_manually = true
   # Hosted zone will be private if VPC id entered
@@ -40,26 +42,26 @@ module "gitlab-instance" {
   # Instance type can be updated in place but will require restart.
   # Supported instance types for gitlab-ce
   # https://aws.amazon.com/marketplace/pp/prodview-w6ykryurkesjq
-  instance_type  = "t2.nano"
-  volume_size    = 10
+  instance_type    = "t2.nano"
+  volume_size      = 10
   encrypted_volume = false
   # list of cidr block with ssh access to instance
   # Note that only non-vpc cidr blocks have to be added
-  ssh_cidr_blocks = []
-  vpc             = module.eks-cluster.cluster-vpc
-  subnet_ids      = local.cluster_subnet_ids
+  external_ssh = []
+  vpc          = module.eks-cluster.cluster-vpc
+  subnet_ids   = local.cluster_subnet_ids
   # Possible values are "private" or "public"
   subnet_type = "private"
   # Possible values are "none", "internal" or "external"
   # If alb set to "none" and subnet_type is set to public
   # EIP will be allocated and associated with instance
-  alb = "none"
+  alb = "external"
   # Enter certificate arn to enable https listener and http -> https redirect
   # Possible values are "none" or a valid certificate arn
   # If not set to "none" tls_termination must be turned on
   # If alb is set to "none" then certificate_arn must be set to "none" or omitted.
-  ####certificate_arn = module.huseynov-net.certificate_arn
-  ####tls_termination = true
+  certificate_arn = module.huseynov-net.certificate_arn
+  tls_termination = true
   # Possible values are "none" or a valid subdomain
   # If not set to "none" hosted_zone_id must be set as well
   subdomain = "none"

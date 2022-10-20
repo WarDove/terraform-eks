@@ -72,7 +72,7 @@ resource "aws_alb_target_group" "main" {
 
 # HTTP only listener
 resource "aws_alb_listener" "http_only" {
-  count             = local.create_alb ? 1 : 0
+  count             = local.create_alb && !var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 80
   protocol          = "HTTP"

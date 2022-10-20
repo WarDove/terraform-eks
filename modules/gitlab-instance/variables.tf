@@ -2,7 +2,7 @@ variable "instance_type" {}
 variable "vpc" {}
 variable "gitlab-version" {}
 variable "volume_size" {}
-variable "ssh_cidr_blocks" {}
+variable "external_ssh" {}
 variable "subnet_ids" {}
 variable "encrypted_volume" {}
 

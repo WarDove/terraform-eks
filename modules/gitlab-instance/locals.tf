@@ -7,12 +7,6 @@ locals {
       cidr_blocks = [var.vpc.cidr_block]
     },
     {
-      from        = 22
-      to          = 22
-      protocol    = "tcp"
-      cidr_blocks = var.ssh_cidr_blocks
-    },
-    {
       from        = 80
       to          = 80
       protocol    = "tcp"
@@ -31,7 +25,7 @@ locals {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
-
+  
   subnet_ids   = var.subnet_ids[var.subnet_type]
   internal_alb = var.alb == "internal"
   create_alb   = var.alb != "none"
