@@ -73,7 +73,7 @@ resource "aws_security_group" "gitlab" {
       cidr_blocks = ingress.value.cidr_blocks
     }
   }
-# Adding external ssh access if at least one cidr block is set in external_ssh
+  # Adding external ssh access if at least one cidr block is set in external_ssh
   dynamic "ingress" {
     for_each = length(var.external_ssh) > 1 ? [1] : []
     content {
