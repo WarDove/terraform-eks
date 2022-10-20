@@ -35,8 +35,7 @@ module "huseynov-net" {
 
 # Provision a gitlab instance in AWS
 module "gitlab-instance" {
-  source = "./modules/gitlab-instance"
-
+  source         = "./modules/gitlab-instance"
   gitlab-version = "15.4.2"
   instance_type  = "t3.micro"
   volume_size    = 10
@@ -55,6 +54,17 @@ module "gitlab-instance" {
   # Cannot be set to "none" if tls_termination is true
   tls_termination = true
   certificate_arn = module.huseynov-net.certificate_arn
+  # Possible values are "none" or a valid subdomain
+  # If not set to "none" hosted_zone_id must be set as well
+  subdomain      = "none"
+  # Possible values are "none" or a valid hosted zone id
+  # If not set to "none" subdomain must be set as well
+  hosted_zone_id = "none"
+  # Must be noted that if alb is set to "none" and subnet_type
+  # is set to "private" setting both subdomain and hosted_zone_id
+  # Will trigger an error, but if subnet_type is set to be public
+  # dns record will be created for elastic ip of the instance
+  # without tls_termination
 
   providers = {
     aws = aws

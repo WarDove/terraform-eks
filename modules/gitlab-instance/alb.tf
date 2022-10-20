@@ -124,7 +124,7 @@ resource "aws_alb_listener" "https" {
 }
 
 # If subnet is public and no alb created then eip will be allocated
-resource "aws_eip" "ngw_eip" {
+resource "aws_eip" "instance_eip" {
   count    = local.allocate_eip ? 1 : 0
   instance = aws_instance.gitlab.id
   vpc      = true

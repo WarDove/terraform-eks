@@ -5,6 +5,14 @@ variable "volume_size" {}
 variable "ssh_cidr_blocks" {}
 variable "subnet_ids" {}
 
+variable "hosted_zone_id" {
+  default = "none"
+}
+
+variable "subdomain" {
+  default = "none"
+}
+
 variable "subnet_type" {
   default     = "none"
   type        = string

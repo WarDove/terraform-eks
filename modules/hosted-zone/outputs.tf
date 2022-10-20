@@ -5,3 +5,7 @@ output "certificate_arn" {
   ]
   value = join("", aws_acm_certificate.main[*].arn)
 }
+
+output "zone_id" {
+  value = local.zone_id
+}
