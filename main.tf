@@ -64,10 +64,10 @@ module "gitlab-instance" {
   tls_termination = true
   # Possible values are "none" or a valid subdomain
   # If not set to "none" hosted_zone_id must be set as well
-  subdomain = "none"
+  subdomain = "gitlab"
   # Possible values are "none" or a valid hosted zone id
   # If not set to "none" subdomain must be set as well
-  hosted_zone_id = "none"
+  hosted_zone_id = module.huseynov-net.zone_id
   # Must be noted that if alb is set to "none" and subnet_type
   # is set to "private" setting both subdomain and hosted_zone_id
   # Will trigger an error, but if subnet_type is set to be public
@@ -101,8 +101,10 @@ module "eks-cluster" {
     kubernetes = kubernetes
   }
 }
+
 # TODO: Gitlab outputs
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
-# TODO: AWS backups integrate with gitlab instance
+# TODO: AWS backups integrate with gitlab instance and make modular for all
+
 

@@ -38,7 +38,7 @@ resource "aws_lb" "main" {
   internal                   = local.internal_alb
   load_balancer_type         = "application"
   security_groups            = aws_security_group.alb[*].id
-  subnets                    = local.subnet_ids
+  subnets                    = local.internal_alb ? var.subnet_ids["private"] : var.subnet_ids["public"]
   enable_deletion_protection = false
 
   tags = {
@@ -68,6 +68,13 @@ resource "aws_alb_target_group" "main" {
   tags = {
     Name = "gitlab-instance"
   }
+}
+
+resource "aws_lb_target_group_attachment" "main" {
+  count            = local.create_alb ? 1 : 0
+  target_group_arn = aws_alb_target_group.main[0].arn
+  target_id        = aws_instance.gitlab.id
+  port             = 80
 }
 
 # HTTP only listener
