@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo hostnamectl set-hostname ${nodename}~$(curl http://169.254.169.254/latest/meta-data/instance-id)
+sudo hostnamectl set-hostname ${node_name}~$(curl http://169.254.169.254/latest/meta-data/instance-id)
 
 sudo apt-get update -y
 sudo apt-get install apache2 unzip -y

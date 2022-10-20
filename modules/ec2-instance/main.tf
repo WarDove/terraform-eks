@@ -42,20 +42,17 @@ resource "aws_instance" "main" {
     encrypted   = var.encrypted_volume
   }
 
-  user_data = templatefile("${path.module}/userdata.tpl",
-    {
-      nodename = "${var.name}-instance"
-  })
+  user_data = templatefile("${path.module}/userdata.tpl", { node_name = var.name })
 
   key_name = aws_key_pair.main.id
 
   lifecycle {
-    ignore_changes = [user_data]
-    prevent_destroy = true
+    ignore_changes  = [user_data]
+    prevent_destroy = false
   }
 
   tags = {
-    Name    = "${var.name}"
+    Name    = var.name
     version = data.aws_ami.main.name_regex
   }
 }

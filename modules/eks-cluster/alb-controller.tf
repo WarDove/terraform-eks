@@ -2,8 +2,8 @@
 resource "kubernetes_service_account" "aws-lbc" {
   count = var.load_balancer ? 1 : 0
 
-    depends_on = [
-      data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig
+  depends_on = [
+    data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig
   ]
 
   metadata {

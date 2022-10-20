@@ -16,12 +16,12 @@ locals {
 
     profile-1 = [
       { namespace = "default",
-        labels = {} }
+      labels = {} }
     ],
 
     profile-2 = [
       { namespace = "my-namespace",
-        labels = {} }
+      labels = {} }
     ]
   }
 
