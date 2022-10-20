@@ -37,10 +37,15 @@ module "huseynov-net" {
 module "gitlab-instance" {
   source         = "./modules/gitlab-instance"
   gitlab-version = "15.4.2"
-  instance_type  = "t3.micro"
+  # Instance type can be updated in place but will require restart.
+  # Supported instance types for gitlab-ce
+  # https://aws.amazon.com/marketplace/pp/prodview-w6ykryurkesjq
+  instance_type  = "t2.nano"
   volume_size    = 10
+  encrypted_volume = false
   # list of cidr block with ssh access to instance
-  ssh_cidr_blocks = ["185.96.126.106/32"]
+  # Note that only non-vpc cidr blocks have to be added
+  ssh_cidr_blocks = []
   vpc             = module.eks-cluster.cluster-vpc
   subnet_ids      = local.cluster_subnet_ids
   # Possible values are "private" or "public"
@@ -53,8 +58,8 @@ module "gitlab-instance" {
   # Possible values are "none" or a valid certificate arn
   # If not set to "none" tls_termination must be turned on
   # If alb is set to "none" then certificate_arn must be set to "none" or omitted.
-  certificate_arn = module.huseynov-net.certificate_arn
-  tls_termination = true
+  ####certificate_arn = module.huseynov-net.certificate_arn
+  ####tls_termination = true
   # Possible values are "none" or a valid subdomain
   # If not set to "none" hosted_zone_id must be set as well
   subdomain = "none"
@@ -94,9 +99,7 @@ module "eks-cluster" {
     kubernetes = kubernetes
   }
 }
-
-
-# TODO: EIP for no alb version
+# TODO: Gitlab outputs
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
 # TODO: AWS backups integrate with gitlab instance

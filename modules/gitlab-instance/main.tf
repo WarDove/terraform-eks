@@ -33,12 +33,13 @@ resource "aws_instance" "gitlab" {
   instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.gitlab.id]
   subnet_id                   = local.subnet_ids[0]
-  disable_api_termination     = true
-  disable_api_stop            = true
+  #disable_api_termination     = true
+  #disable_api_stop            = true
   user_data_replace_on_change = false
 
   root_block_device {
     volume_size = var.volume_size
+    encrypted = var.encrypted_volume
   }
 
   user_data = templatefile("${path.module}/userdata.tpl",

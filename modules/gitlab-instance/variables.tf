@@ -4,6 +4,7 @@ variable "gitlab-version" {}
 variable "volume_size" {}
 variable "ssh_cidr_blocks" {}
 variable "subnet_ids" {}
+variable "encrypted_volume" {}
 
 variable "hosted_zone_id" {
   default = "none"
