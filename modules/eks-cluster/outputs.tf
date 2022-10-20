@@ -1,5 +1,9 @@
-output "kube_api_endpoint" {
+output "kube-api-endpoint" {
   value = aws_eks_cluster.eks-cluster.endpoint
+}
+
+output "kube-api-token" {
+  value = data.aws_eks_cluster_auth.eks-cluster.token
 }
 
 output "kubeconfig-certificate-authority-data" {

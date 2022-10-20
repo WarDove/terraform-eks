@@ -1,5 +1,5 @@
 # The 'aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands
-# Configures kubectl so that you can connect to an Amazon EKS cluster.
+# Configures kubectl so that you can connect to an Amazon EKS cluster from local kubectl.
 # Alternative of using aws cli: 
 # aws eks --profile "${profile}" --region "${region}" update-kubeconfig --name ${cluster_name}
 data "utils_aws_eks_update_kubeconfig" "bootstrap-kubeconfig" {

@@ -10,6 +10,10 @@ data "aws_iam_policy_document" "eks-cluster-role" {
   }
 }
 
+data "aws_eks_cluster_auth" "eks-cluster" {
+  name = aws_eks_cluster.eks-cluster.name
+}
+
 resource "aws_iam_role" "eks-cluster-role" {
   name               = "eksClusterRole"
   assume_role_policy = data.aws_iam_policy_document.eks-cluster-role.json

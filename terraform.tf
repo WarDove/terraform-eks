@@ -40,10 +40,14 @@ provider "aws" {
 
 provider "helm" {
   kubernetes {
-    config_path = "~/.kube/config"
+    host                   = module.eks-cluster.kube-api-endpoint
+    token                  = module.eks-cluster.kube-api-token
+    cluster_ca_certificate = base64decode(module.eks-cluster.kubeconfig-certificate-authority-data)
   }
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  host                   = module.eks-cluster.kube-api-endpoint
+  token                  = module.eks-cluster.kube-api-token
+  cluster_ca_certificate = base64decode(module.eks-cluster.kubeconfig-certificate-authority-data)
 }

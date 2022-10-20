@@ -1,5 +1,5 @@
-output "kube_api_endpoint" {
-  value = module.eks-cluster.kube_api_endpoint
+output "kube-api-endpoint" {
+  value = module.eks-cluster.kube-api-endpoint
 }
 
 output "kubeconfig-certificate-authority-data" {

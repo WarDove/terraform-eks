@@ -62,7 +62,7 @@ module "gitlab-instance" {
 # Provision an EKS cluster
 module "eks-cluster" {
   source               = "./modules/eks-cluster"
-  cluster_name         = var.cluster_name
+  cluster_name         = "gitlab-cluster"
   public_api           = true
   load_balancer        = true
   fargate_only_cluster = true
