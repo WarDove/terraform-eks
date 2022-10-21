@@ -10,9 +10,9 @@ set -euo pipefail
 # check if ec2 is set for compute type in annotations of coredns
 EC2_COMPUTE_TYPE="$(kubectl get deploy coredns -n kube-system -o json | jq -r '.spec.template.metadata.annotations["eks.amazonaws.com/compute-type"]')"
 
-# TODO: change this to kubernetes terraform configuration
 if [[ ${FARGATE_ONLY} == true && ${EC2_COMPUTE_TYPE} != null ]]; then
   kubectl patch deployment coredns -n kube-system --type=json -p='[{"op": "remove", "path": "/spec/template/metadata/annotations", "value": "eks.amazonaws.com/compute-type"}]';
+  sleep 10;
   kubectl rollout restart -n kube-system deployment coredns
 elif [[ ${FARGATE_ONLY} == false && ${EC2_COMPUTE_TYPE} != ec2 ]]; then
   kubectl patch deploy coredns -n kube-system -p '{"spec": {"template": {"metadata": {"annotations": {"eks.amazonaws.com/compute-type": "ec2"}}}}}'  

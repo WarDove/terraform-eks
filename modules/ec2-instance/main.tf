@@ -73,12 +73,12 @@ resource "aws_security_group" "main" {
   }
   # Adding external ssh access if at least one cidr block is set in external_ssh
   dynamic "ingress" {
-    for_each = length(var.external_ssh) > 1 ? [1] : []
+    for_each = length(var.external_ssh) > 0 ? [1] : []
     content {
       from_port   = 22
       to_port     = 22
-      protocol    = tcp
-      cidr_blocks = [var.external_ssh]
+      protocol    = "tcp"
+      cidr_blocks = var.external_ssh
     }
   }
 

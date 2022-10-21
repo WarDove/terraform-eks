@@ -22,7 +22,7 @@ module "gitlab-instance" {
   name             = "ubuntu"
   ami_owners       = ["099720109477"]
   ami_regex        = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220610"
-  instance_type    = "t2.nano"
+  instance_type    = "t2.medium"
   volume_size      = 10
   encrypted_volume = false
   public_key       = file("${path.cwd}/files/id_rsa.pub")
@@ -35,7 +35,7 @@ module "gitlab-instance" {
 
   # list of cidr block with ssh access to instance
   # Note that only non-vpc cidr blocks have to be added
-  external_ssh = []
+  external_ssh = ["185.96.126.106/32"]
   vpc          = module.eks-cluster.cluster-vpc
   subnet_ids   = local.cluster_subnet_ids
   # Possible values are "private" or "public"
