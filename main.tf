@@ -25,13 +25,13 @@ module "gitlab-instance" {
   instance_type    = "t2.nano"
   volume_size      = 10
   encrypted_volume = false
-  public_key = file("${path.cwd}/files/id_rsa.pub")
+  public_key       = file("${path.cwd}/files/id_rsa.pub")
 
   user_data = templatefile("${path.cwd}/files/gitlab_user_data.tpl",
     {
-      node_name = "Gitlab-Instance-Test"
+      node_name  = "Gitlab-Instance-Test"
       gitlab_url = "gitlab.huseynov.net"
-    })
+  })
 
   # list of cidr block with ssh access to instance
   # Note that only non-vpc cidr blocks have to be added
@@ -92,7 +92,6 @@ module "eks-cluster" {
 }
 
 # TODO: implement automated Gitlab installation and configuration
-# TODO: Gitlab outputs
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
 # TODO: AWS backups integrate with gitlab instance and make modular for all
