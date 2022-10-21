@@ -14,7 +14,7 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt install -y ca-certificates curl openssh-server tzdata
 curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
-sudo EXTERNAL_URL="https://${gitlab_url}" apt-get install --assume-yes gitlab-ce_15.4.3-ce.0
+sudo EXTERNAL_URL="https://${gitlab_url}" apt-get install --assume-yes gitlab-ce=15.4.3-ce.0
 
 
 
