@@ -19,7 +19,7 @@ module "huseynov-net" {
 # Provision a gitlab instance in AWS
 module "gitlab-instance" {
   source           = "./modules/ec2-instance"
-  name             = "ubuntu"
+  name             = "gitlab"
   ami_owners       = ["099720109477"]
   ami_regex        = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220610"
   instance_type    = "t2.medium"
