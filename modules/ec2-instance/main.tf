@@ -25,7 +25,7 @@ data "aws_ami" "main" {
 
 resource "aws_key_pair" "main" {
   key_name   = "${var.name}-instance-key"
-  public_key = file("${path.module}/public-key/id_rsa.pub")
+  public_key = var.public_key
 }
 
 resource "aws_instance" "main" {
@@ -42,7 +42,7 @@ resource "aws_instance" "main" {
     encrypted   = var.encrypted_volume
   }
 
-  user_data = templatefile("${path.module}/userdata.tpl", { node_name = var.name })
+  user_data = var.user_data
 
   key_name = aws_key_pair.main.id
 

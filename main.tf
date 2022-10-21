@@ -25,6 +25,14 @@ module "gitlab-instance" {
   instance_type    = "t2.nano"
   volume_size      = 10
   encrypted_volume = false
+  public_key = file("${path.cwd}/files/id_rsa.pub")
+
+  user_data = templatefile("${path.cwd}/files/gitlab_user_data.tpl",
+    {
+      node_name = "Gitlab-Instance-Test"
+      gitlab_url = "gitlab.huseynov.net"
+    })
+
   # list of cidr block with ssh access to instance
   # Note that only non-vpc cidr blocks have to be added
   external_ssh = []
@@ -57,6 +65,7 @@ module "gitlab-instance" {
   providers = {
     aws = aws
   }
+
 }
 
 # Provision an EKS cluster

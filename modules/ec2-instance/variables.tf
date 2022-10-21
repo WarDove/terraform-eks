@@ -1,6 +1,8 @@
 variable "instance_type" {}
 variable "vpc" {}
 variable "name" {}
+variable "user_data" {}
+variable "public_key" {}
 variable "ami_owners" {}
 variable "ami_regex" {}
 variable "volume_size" {}
