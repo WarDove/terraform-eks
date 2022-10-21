@@ -27,7 +27,7 @@ module "gitlab-instance" {
   encrypted_volume = false
   public_key       = file("${path.cwd}/files/id_rsa.pub")
 
-  user_data = templatefile("${path.cwd}/files/gitlab_user_data.tpl",
+  user_data = templatefile("${path.cwd}/templates/gitlab_user_data.tpl",
     {
       node_name  = "Gitlab-Instance-Test"
       gitlab_url = "gitlab.huseynov.net"
