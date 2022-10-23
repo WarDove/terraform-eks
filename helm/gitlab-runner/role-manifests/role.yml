@@ -5,5 +5,5 @@ metadata:
   name: gitlab-role
 rules:
   - apiGroups: [""] # "" indicates the core API group
-    resources: ["pods", "pods/exec", "secrets"]
+    resources: ["pods", "pods/exec", "secrets", "configmaps"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
