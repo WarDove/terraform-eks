@@ -91,6 +91,7 @@ module "eks-cluster" {
   }
 }
 
+# TODO: internal ALB and Private Hosted Zone implementation
 # TODO: implement automated Gitlab installation and configuration
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
