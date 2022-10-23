@@ -318,7 +318,11 @@ runners:
     [[runners]]
       [runners.kubernetes]
         namespace = "{{.Release.Namespace}}"
-        image = "ubuntu:16.04"
+        image = "docker:20.10.20"
+        privileged = true
+
+  ## TODO: S3 caching
+  ## TODO: Docker pulic registry login via env variable
 
   ## Which executor should be used
   ##

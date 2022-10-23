@@ -13,18 +13,25 @@ data "utils_aws_eks_update_kubeconfig" "bootstrap-kubeconfig" {
   region       = var.region
 }
 
+
+# if this is a fargate-only cluster we will need to remove specific annotation
+# ("eks.amazonaws.com/compute-type": "ec2") from coredns deployment  to enable
+# its deployment on fargate
+
 # In AWS EKS, clusters come "pre-configured" with several things running in the kube-system namespace.
 # We need to patch those pre-configured things, while retaining any "upstream" changes which happen to be made.
 # (for example: set HTTP_PROXY variables) kubectl provides the patch keyword to handle this use-case.
 # The kubernetes provider for terraform should do the same.
 # worked it around with a provisioner and bash script that patches the deployment
-#resource "kubernetes_manifest" "patch-coredns" {
-#  manifest = yamldecode(file("./manifests/test.yml"))
-#}
+
 resource "null_resource" "patch-coredns" {
   depends_on = [
+    # depends on fargate profile for kube-system namespace
+    # if it is an only fargate cluster
+    # kubeconfig has to be set up for kubectl patch commands
+    aws_eks_fargate_profile.eks-cluster-fargate-kubesystem,
     data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig
-  ]
+    ]
 
   triggers = {
     api_endpoint_up = aws_eks_cluster.eks-cluster.endpoint

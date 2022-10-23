@@ -3,7 +3,9 @@ resource "kubernetes_service_account" "aws-lbc" {
   count = var.load_balancer ? 1 : 0
 
   depends_on = [
-    aws_eks_cluster.eks-cluster
+    aws_eks_cluster.eks-cluster,
+    aws_eks_fargate_profile.eks-cluster-fargate-kubesystem,
+    aws_eks_fargate_profile.eks-cluster-fargate
   ]
 
   metadata {
