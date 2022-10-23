@@ -533,7 +533,7 @@ runners:
   ## If Gitlab is not reachable through $CI_SERVER_URL
   ##
   ## DEPRECATED: See https://docs.gitlab.com/runner/install/kubernetes.html#additional-configuration
-  # cloneUrl:
+  cloneUrl: https://gitlab.huseynov.net
 
   ## Specify node labels for CI job pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
