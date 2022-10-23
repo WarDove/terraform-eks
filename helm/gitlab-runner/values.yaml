@@ -564,7 +564,7 @@ runners:
   ## created for each build.
   ##
   ## ref: https://docs.gitlab.com/runner/commands/#gitlab-runner-register
-  ##
+
   ## DEPRECATED: See https://docs.gitlab.com/runner/install/kubernetes.html#additional-configuration
   # env:
   #   NAME: VALUE
@@ -578,6 +578,9 @@ runners:
 ## Configure securitycontext for the main container
 ## ref: http://kubernetes.io/docs/user-guide/security-context/
 ##
+# ONE IMPORTANT NOTE HERE
+# You cannot run Daemonsets, Privileged pods, or pods that use HostNetwork or HostPort
+# https://aws.amazon.com/blogs/aws/amazon-eks-on-aws-fargate-now-generally-available/
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: false
