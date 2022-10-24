@@ -18,6 +18,10 @@ variable "subdomain" {
   default = "none"
 }
 
+variable "registry_subdomain" {
+  default = "none"
+}
+
 variable "subnet_type" {
   default     = "none"
   type        = string

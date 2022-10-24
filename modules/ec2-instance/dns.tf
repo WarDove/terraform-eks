@@ -23,10 +23,26 @@ data "aws_route53_zone" "main" {
   }
 }
 
+# Record for instance subdomain
 resource "aws_route53_record" "alb_record" {
   count   = var.subdomain != "none" && local.create_alb ? 1 : 0
   zone_id = data.aws_route53_zone.main[0].zone_id
   name    = "${var.subdomain}.${data.aws_route53_zone.main[0].name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.main[0].dns_name
+    zone_id                = aws_lb.main[0].zone_id
+    evaluate_target_health = true
+  }
+}
+# TODO: Create logic for apex domain as well i.e if subdomain == "apex"
+
+# Record for docker registry subdomain
+resource "aws_route53_record" "alb_record_docker" {
+  count   = var.registry_subdomain != "none" && local.create_alb ? 1 : 0
+  zone_id = data.aws_route53_zone.main[0].zone_id
+  name    = "${var.registry_subdomain}.${data.aws_route53_zone.main[0].name}"
   type    = "A"
 
   alias {
