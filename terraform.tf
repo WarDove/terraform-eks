@@ -38,11 +38,10 @@ provider "aws" {
   region  = var.region
 }
 
+# Pre-requisite: kubectl-v1.24.2
 provider "helm" {
   kubernetes {
-    host                   = module.eks-cluster.kube-api-endpoint
-    token                  = module.eks-cluster.kube-api-token
-    cluster_ca_certificate = base64decode(module.eks-cluster.kubeconfig-certificate-authority-data)
+    config_path = "~/.kube/config"
   }
 }
 

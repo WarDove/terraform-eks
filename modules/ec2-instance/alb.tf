@@ -133,3 +133,5 @@ resource "aws_eip" "instance_eip" {
     Name = "${var.name}-instance"
   }
 }
+
+# If both internal and external type load-balancers are needed
