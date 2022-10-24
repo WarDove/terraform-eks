@@ -17,12 +17,6 @@ locals {
       to          = 443
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-      from        = 5050
-      to          = 5050
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
     }
   ]
 

@@ -19,19 +19,6 @@ resource "aws_security_group" "alb" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  # Specifically for Gitlab instance registry access over public
-  # TODO: remove this as soon as tests are over
-  dynamic "ingress" {
-    for_each = var.subdomain == "gitlab" ? [1] : []
-    content {
-      protocol         = "tcp"
-      from_port        = 5050
-      to_port          = 5050
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = ["::/0"]
-    }
-  }
-
   egress {
     protocol         = "-1"
     from_port        = 0
@@ -59,11 +46,18 @@ resource "aws_lb" "main" {
   }
 }
 
+resource "random_id" "target_group_id" {
+  byte_length = 4
+  keepers = {
+    "load_balancer_id" = aws_lb.main[0].id
+  }
+}
+
 resource "aws_alb_target_group" "main" {
   count       = local.create_alb ? 1 : 0
-  name        = "${var.name}-instance"
-  port        = 80
-  protocol    = "HTTP"
+  name        = "${var.name}-instance-${random_id.target_group_id.hex}"
+  port        = var.tls_termination ? 443 : 80
+  protocol    = var.tls_termination ? "HTTPS" : "HTTP"
   vpc_id      = var.vpc.id
   target_type = "instance"
   depends_on  = [aws_lb.main]
@@ -71,11 +65,15 @@ resource "aws_alb_target_group" "main" {
   health_check {
     healthy_threshold   = "3"
     interval            = "30"
-    protocol            = "HTTP"
+    protocol            = "HTTPS"
     matcher             = "200"
     timeout             = "3"
     path                = "/"
     unhealthy_threshold = "2"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 
   tags = {
@@ -87,7 +85,7 @@ resource "aws_lb_target_group_attachment" "main" {
   count            = local.create_alb ? 1 : 0
   target_group_arn = aws_alb_target_group.main[0].arn
   target_id        = aws_instance.main.id
-  port             = 80
+  port             = var.tls_termination ? 443 : 80
 }
 
 # HTTP only listener
@@ -146,54 +144,3 @@ resource "aws_eip" "instance_eip" {
     Name = "${var.name}-instance"
   }
 }
-
-# Exposing Registry port
-resource "aws_alb_target_group" "registry" {
-  count       = local.create_alb && var.subdomain == "gitlab" ? 1 : 0
-  name        = "${var.name}-instance-registry"
-  port        = 5050
-  protocol    = "HTTP"
-  vpc_id      = var.vpc.id
-  target_type = "instance"
-  depends_on  = [aws_lb.main]
-
-  tags = {
-    Name = "${var.name}-instance-registry"
-  }
-}
-
-resource "aws_lb_target_group_attachment" "registry" {
-  count            = local.create_alb && var.subdomain == "gitlab" ? 1 : 0
-  target_group_arn = aws_alb_target_group.registry[0].arn
-  target_id        = aws_instance.main.id
-  port             = 5050
-}
-
-resource "aws_alb_listener" "registry" {
-  count             = local.create_alb && var.tls_termination && var.subdomain == "gitlab" ? 1 : 0
-  load_balancer_arn = aws_lb.main[0].id
-  port              = 5050
-  protocol          = "HTTPS"
-
-  ssl_policy      = "ELBSecurityPolicy-2016-08"
-  certificate_arn = var.certificate_arn
-
-  default_action {
-    target_group_arn = aws_alb_target_group.registry[0].id
-    type             = "forward"
-  }
-}
-
-resource "aws_alb_listener" "registry_http_only" {
-  count             = local.create_alb && var.subdomain == "gitlab" && !var.tls_termination ? 1 : 0
-  load_balancer_arn = aws_lb.main[0].id
-  port              = 5050
-  protocol          = "HTTP"
-
-  default_action {
-    target_group_arn = aws_alb_target_group.main[0].id
-    type             = "forward"
-  }
-}
-
-# If both internal and external type load-balancers are needed
