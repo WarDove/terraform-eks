@@ -37,7 +37,7 @@ module "gitlab-instance" {
 
   # list of cidr block with ssh access to instance
   # Note that only non-vpc cidr blocks have to be added
-  external_ssh = ["185.96.126.106/32", "94.20.67.71/32"]
+  external_ssh = ["185.96.126.106/32", "94.20.66.187/32"]
   vpc          = module.eks-cluster.cluster-vpc
   subnet_ids   = local.cluster_subnet_ids
   # Possible values are "private" or "public"
