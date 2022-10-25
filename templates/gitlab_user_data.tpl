@@ -14,7 +14,29 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt install -y ca-certificates curl openssh-server tzdata
 curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
-sudo EXTERNAL_URL="http://${gitlab_url}" apt-get install --assume-yes gitlab-ce=15.4.3-ce.0
+# Alternative way to set Instance url during installation
+# sudo EXTERNAL_URL="${gitlab_url}" apt-get install --assume-yes gitlab-ce=15.4.3-ce.0
+sudo apt-get install --assume-yes gitlab-ce=15.4.3-ce.0
+
+# Gitlab Configuration
+# the sequence $${ is the escape sequence for literal ${
+cat <<GITLABCONF > /etc/gitlab/gitlab.rb
+external_url '${gitlab_url}'
+registry_external_url '${repository_url}'
+nginx['listen_port'] = 443
+nginx['proxy_set_headers'] = {
+  "Host" => "$$http_host_with_default",
+  "X-Real-IP" => "$$remote_addr",
+  "X-Forwarded-For" => "$$proxy_add_x_forwarded_for",
+  "X-Forwarded-Proto" => "${X-Forwarded-Proto-Header}",
+  "X-Forwarded-Ssl" => "on",
+  "Upgrade" => "$$http_upgrade",
+  "Connection" => "$$connection_upgrade"
+ }
+nginx['http2_enabled'] = false
+GITLABCONF
+
+sudo gitlab-ctl reconfigure
 
 
 

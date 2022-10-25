@@ -18,7 +18,7 @@ module "huseynov-net" {
 
 # Provision a gitlab instance in AWS
 module "gitlab-instance" {
-  source           = "./modules/ec2-instance"
+  source           = "./modules/gitlab-instance"
   name             = "gitlab"
   ami_owners       = ["099720109477"]
   ami_regex        = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220610"
@@ -30,7 +30,9 @@ module "gitlab-instance" {
   user_data = templatefile("${path.cwd}/templates/gitlab_user_data.tpl",
     {
       node_name  = "Gitlab-Instance-Test"
-      gitlab_url = "gitlab.huseynov.net"
+      gitlab_url = "https://gitlab.huseynov.net"
+      repository_url = "https://docker.huseynov.net"
+      X-Forwarded-Proto-Header = "https"
   })
 
   # list of cidr block with ssh access to instance
