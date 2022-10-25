@@ -9,6 +9,8 @@ variable "volume_size" {}
 variable "external_ssh" {}
 variable "subnet_ids" {}
 variable "encrypted_volume" {}
+variable "alb" {}
+variable "internal_alb" {}
 
 variable "hosted_zone_id" {
   default = "none"
@@ -45,16 +47,5 @@ variable "certificate_arn" {
   validation {
     condition     = can(regex("^arn:aws:acm:", var.certificate_arn)) || var.certificate_arn == "none"
     error_message = "Invalid input: Possible values are \"none\" or a valid certificate arn"
-  }
-}
-
-variable "alb" {
-  default     = "none"
-  type        = string
-  description = "Application load balancer type (internal or external) - also can be set to none"
-
-  validation {
-    condition     = var.alb == "none" || var.alb == "internal" || var.alb == "external"
-    error_message = "Invalid input: Possible values are \"none\", \"internal\" or \"external\""
   }
 }

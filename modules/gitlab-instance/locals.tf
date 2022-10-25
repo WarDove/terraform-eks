@@ -21,8 +21,6 @@ locals {
   ]
 
   subnet_ids   = var.subnet_ids[var.subnet_type]
-  internal_alb = var.alb == "internal"
-  create_alb   = var.alb != "none"
   allocate_eip = var.subnet_type == "public" && var.alb == "none"
   # checks if tls_termination value corresponds to certificate arn
   tls_input_verify = var.tls_termination == (var.certificate_arn != "none")

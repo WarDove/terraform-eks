@@ -42,10 +42,8 @@ module "gitlab-instance" {
   subnet_ids   = local.cluster_subnet_ids
   # Possible values are "private" or "public"
   subnet_type = "public"
-  # Possible values are "none", "internal" or "external"
-  # If alb set to "none" and subnet_type is set to public
-  # EIP will be allocated and associated with instance
-  alb = "external"
+  alb = true
+  internal_alb = true
   # Enter certificate arn to enable https listener and http -> https redirect
   # Possible values are "none" or a valid certificate arn
   # If not set to "none" tls_termination must be turned on

@@ -33,9 +33,9 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb" "main" {
-  count                      = local.create_alb ? 1 : 0
+  count                      = var.alb ? 1 : 0
   name                       = "${var.name}-instance-alb"
-  internal                   = local.internal_alb
+  internal                   = false
   load_balancer_type         = "application"
   security_groups            = aws_security_group.alb[*].id
   subnets                    = local.internal_alb ? var.subnet_ids["private"] : var.subnet_ids["public"]
@@ -43,6 +43,20 @@ resource "aws_lb" "main" {
 
   tags = {
     Name = "${var.name}-instance-alb"
+  }
+}
+
+resource "aws_lb" "internal" {
+  count                      = var.internal_alb ? 1 : 0
+  name                       = "${var.name}-instance-internal-alb"
+  internal                   = true
+  load_balancer_type         = "application"
+  security_groups            = aws_security_group.alb[*].id
+  subnets                    = local.internal_alb ? var.subnet_ids["private"] : var.subnet_ids["public"]
+  enable_deletion_protection = false
+
+  tags = {
+    Name = "${var.name}-instance-internal-alb"
   }
 }
 
@@ -54,7 +68,7 @@ resource "random_id" "target_group_id" {
 }
 
 resource "aws_alb_target_group" "main" {
-  count       = local.create_alb ? 1 : 0
+  count       = var.alb || var.internal.alb ? 1 : 0
   name        = "${var.name}-instance-${random_id.target_group_id.hex}"
   port        = var.tls_termination ? 443 : 80
   protocol    = var.tls_termination ? "HTTPS" : "HTTP"
@@ -65,7 +79,7 @@ resource "aws_alb_target_group" "main" {
   health_check {
     healthy_threshold   = "3"
     interval            = "30"
-    protocol            = "HTTPS"
+    protocol            = var.tls_termination ? "HTTPS" : "HTTP"
     matcher             = "200"
     timeout             = "3"
     path                = "/"
@@ -82,15 +96,15 @@ resource "aws_alb_target_group" "main" {
 }
 
 resource "aws_lb_target_group_attachment" "main" {
-  count            = local.create_alb ? 1 : 0
+  count            = var.alb || var.internal.alb ? 1 : 0
   target_group_arn = aws_alb_target_group.main[0].arn
   target_id        = aws_instance.main.id
   port             = var.tls_termination ? 443 : 80
 }
 
-# HTTP only listener
+# HTTP only listener#########################
 resource "aws_alb_listener" "http_only" {
-  count             = local.create_alb && !var.tls_termination ? 1 : 0
+  count             = var.alb || var.internal.alb && !var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 80
   protocol          = "HTTP"
