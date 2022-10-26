@@ -47,7 +47,7 @@ module "gitlab-instance" {
   # If not set to "none" subdomain must be set as well
   hosted_zone_id = module.huseynov-net.zone_id
   # Internal alb alias records must be added only to a private hosted zone
-  internal_alb = true
+  internal_alb = false
   # Possible values are "none" or a valid private hosted zone id
   internal_hosted_zone_id = "none"
   # Enter certificate arn to enable https listener and http -> https redirect
@@ -67,11 +67,9 @@ module "gitlab-instance" {
   # Will trigger an error, but if subnet_type is set to be public
   # dns record will be created for elastic ip of the instance
   # without tls_termination
-
   providers = {
     aws = aws
   }
-
 }
 
 # Provision an EKS cluster
@@ -97,8 +95,6 @@ module "eks-cluster" {
   }
 }
 
-# TODO: internal ALB and Private Hosted Zone implementation
-# TODO: implement automated Gitlab installation and configuration
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
 # TODO: AWS backups integrate with gitlab instance and make modular for all

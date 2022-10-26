@@ -229,7 +229,7 @@ resource "aws_alb_listener" "internal_http" {
 
 # HTTPS
 resource "aws_alb_listener" "internal_https" {
-  count             = var.alb && var.tls_termination ? 1 : 0
+  count             = var.internal_alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.internal[0].id
   port              = 443
   protocol          = "HTTPS"

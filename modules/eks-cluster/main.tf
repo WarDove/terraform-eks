@@ -176,7 +176,12 @@ resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
 }
 
 
-# AWS Load Balancer Controller 
+# AWS Load Balancer Controller Service Account Role
+# Policies and roles to be granted to specific service accounts via OIDC provider
+# in this case aws-load-balancer-controller service account located  in kube-system
+# is getting AmazonEKSLoadBalancerControllerRole role which enables it to spin up
+# application load balancers with configured rules from ingress annotations.
+
 resource "aws_iam_policy" "aws-lbc-policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   description = "AWS Load Balancer Controller iam policy"
