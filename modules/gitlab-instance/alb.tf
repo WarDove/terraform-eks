@@ -68,8 +68,8 @@ resource "random_id" "target_group_id" {
 }
 
 resource "aws_alb_target_group" "main" {
-  count       = var.alb || var.internal_alb ? 1 : 0
-  name        = "${var.name}-instance-${random_id.target_group_id.hex}"
+  count       = var.alb ? 1 : 0
+  name        = "${var.name}-external-${random_id.target_group_id.hex}"
   port        = var.tls_termination ? 443 : 80
   protocol    = var.tls_termination ? "HTTPS" : "HTTP"
   vpc_id      = var.vpc.id
@@ -91,13 +91,48 @@ resource "aws_alb_target_group" "main" {
   }
 
   tags = {
-    Name = "${var.name}-instance"
+    Name = "${var.name}-external"
+  }
+}
+
+resource "aws_alb_target_group" "internal" {
+  count       = var.internal_alb ? 1 : 0
+  name        = "${var.name}-internal-${random_id.target_group_id.hex}"
+  port        = var.tls_termination ? 443 : 80
+  protocol    = var.tls_termination ? "HTTPS" : "HTTP"
+  vpc_id      = var.vpc.id
+  target_type = "instance"
+  depends_on  = [aws_lb.internal]
+
+  health_check {
+    healthy_threshold   = "3"
+    interval            = "30"
+    protocol            = var.tls_termination ? "HTTPS" : "HTTP"
+    matcher             = "200"
+    timeout             = "3"
+    path                = "/"
+    unhealthy_threshold = "2"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "${var.name}-internal"
   }
 }
 
 resource "aws_lb_target_group_attachment" "main" {
-  count            = var.alb || var.internal_alb ? 1 : 0
+  count            = var.alb ? 1 : 0
   target_group_arn = aws_alb_target_group.main[0].arn
+  target_id        = aws_instance.main.id
+  port             = var.tls_termination ? 443 : 80
+}
+
+resource "aws_lb_target_group_attachment" "internal" {
+  count            = var.internal_alb ? 1 : 0
+  target_group_arn = aws_alb_target_group.internal[0].arn
   target_id        = aws_instance.main.id
   port             = var.tls_termination ? 443 : 80
 }
@@ -126,7 +161,7 @@ resource "aws_alb_listener" "http_only" {
   }
 }
 
-# HTTPS
+# HTTP to HTTPS redirect
 resource "aws_alb_listener" "http" {
   count             = var.alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
@@ -144,7 +179,7 @@ resource "aws_alb_listener" "http" {
   }
 }
 
-# HTTP to HTTPS redirect
+# HTTPS
 resource "aws_alb_listener" "https" {
   count             = var.alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
@@ -169,12 +204,12 @@ resource "aws_alb_listener" "internal_http_only" {
   protocol          = "HTTP"
 
   default_action {
-    target_group_arn = aws_alb_target_group.main[0].id
+    target_group_arn = aws_alb_target_group.internal[0].id
     type             = "forward"
   }
 }
 
-# HTTPS
+# HTTP to HTTPS redirect
 resource "aws_alb_listener" "internal_http" {
   count             = var.internal_alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.internal[0].id
@@ -192,7 +227,7 @@ resource "aws_alb_listener" "internal_http" {
   }
 }
 
-# HTTP to HTTPS redirect
+# HTTPS
 resource "aws_alb_listener" "internal_https" {
   count             = var.alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.internal[0].id
@@ -203,7 +238,7 @@ resource "aws_alb_listener" "internal_https" {
   certificate_arn = var.certificate_arn
 
   default_action {
-    target_group_arn = aws_alb_target_group.main[0].id
+    target_group_arn = aws_alb_target_group.internal[0].id
     type             = "forward"
   }
 }

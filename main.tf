@@ -43,7 +43,13 @@ module "gitlab-instance" {
   # Possible values are "private" or "public"
   subnet_type  = "public"
   alb          = true
+  # Possible values are "none" or a valid hosted zone id
+  # If not set to "none" subdomain must be set as well
+  hosted_zone_id = module.huseynov-net.zone_id
+  # Internal alb alias records must be added only to a private hosted zone
   internal_alb = true
+  # Possible values are "none" or a valid private hosted zone id
+  internal_hosted_zone_id = "none"
   # Enter certificate arn to enable https listener and http -> https redirect
   # Possible values are "none" or a valid certificate arn
   # If not set to "none" tls_termination must be turned on
@@ -56,9 +62,6 @@ module "gitlab-instance" {
   # Possible values are "none" or a valid subdomain
   # If not set to "none" hosted_zone_id must be set as well
   registry_subdomain = "docker"
-  # Possible values are "none" or a valid hosted zone id
-  # If not set to "none" subdomain must be set as well
-  hosted_zone_id = module.huseynov-net.zone_id
   # Must be noted that if alb is set to "none" and subnet_type
   # is set to "private" setting both subdomain and hosted_zone_id
   # Will trigger an error, but if subnet_type is set to be public

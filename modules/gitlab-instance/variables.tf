@@ -12,6 +12,10 @@ variable "encrypted_volume" {}
 variable "alb" {}
 variable "internal_alb" {}
 
+variable "internal_hosted_zone_id" {
+  default = "none"
+}
+
 variable "hosted_zone_id" {
   default = "none"
 }
