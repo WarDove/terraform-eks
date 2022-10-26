@@ -1,31 +1,59 @@
-# Declare your hosted zone and create certificates via ACM
+##########################################################################################################
+/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>       This module creates hosted-zones      <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  dns_zone        - should be as an apex domain
+  tls_termination - set true to create an ACM certificate with wildcard included in sans
+  vpc_id          - Possible values are "none" or a valid VPC id, hosted zone will be private if VPC id
+   entered
+*/
 module "huseynov-net" {
-  source = "./modules/hosted-zone"
-  # This should be set as an apex domain
-  dns_zone = "huseynov.net"
-  # Set tls_termination to true if you want to create an ACM certificate
-  # with wildcard included in sans.
+  source           = "./modules/hosted-zone"
+  dns_zone         = "huseynov.net"
   tls_termination  = true
   created_manually = true
-  # Hosted zone will be private if VPC id entered
-  # Possible values are "none" or a valid VPC id
-  vpc_id = "none"
+  vpc_id           = "none"
 
   providers = {
     aws = aws
   }
 }
-
-# Provision a gitlab instance in AWS
+##########################################################################################################
+/* >>>>>>>>>>>>>>>>>>>>>       This module provisions a gitlab instance in AWS      <<<<<<<<<<<<<<<<<<<<<<
+  external_ssh            - list of cidr block with ssh access to instance, only non-vpc cidr blocks have
+   to be added
+  subnet_type             - possible values are "private" or "public"
+  hosted_zone_id          - possible values are "none" or any valid hosted zone id, requires subdomain
+   input
+  internal_hosted_zone_id - possible values are "none" or a valid private hosted zone id, internal alb
+   alias
+   records must be added only to a private hosted zone
+  certificate_arn         - possible values are "none" or a valid certificate arn, enables https listener
+   requires
+   tls_termination
+  subdomain               - possible values are "none" or a valid subdomain, requires hosted_zone_id input
+  registry_subdomain      - possible values are "none" or a valid subdomain, requires hosted_zone_id input
+  user_data               - has to be configured respectively depending on previously mentioned variables
+*/
 module "gitlab-instance" {
-  source           = "./modules/gitlab-instance"
-  name             = "gitlab"
-  ami_owners       = ["099720109477"]
-  ami_regex        = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220610"
-  instance_type    = "t2.medium"
-  volume_size      = 10
-  encrypted_volume = false
-  public_key       = file("${path.cwd}/files/id_rsa.pub")
+  source                  = "./modules/gitlab-instance"
+  name                    = "gitlab"
+  ami_owners              = ["099720109477"]
+  ami_regex               = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20220610"
+  instance_type           = "t2.medium"
+  volume_size             = 10
+  encrypted_volume        = false
+  public_key              = file("${path.cwd}/files/id_rsa.pub")
+  external_ssh            = ["185.96.126.106/32", "94.20.66.187/32"]
+  vpc                     = module.eks-cluster.cluster-vpc
+  subnet_ids              = local.cluster_subnet_ids
+  subnet_type             = "public"
+  alb                     = true
+  internal_alb            = false
+  hosted_zone_id          = module.huseynov-net.zone_id
+  internal_hosted_zone_id = "none"
+  certificate_arn         = module.huseynov-net.certificate_arn
+  tls_termination         = true
+  subdomain               = "gitlab"
+  registry_subdomain      = "docker"
 
   user_data = templatefile("${path.cwd}/templates/gitlab_user_data.tpl",
     {
@@ -35,44 +63,18 @@ module "gitlab-instance" {
       X-Forwarded-Proto-Header = "https"
   })
 
-  # list of cidr block with ssh access to instance
-  # Note that only non-vpc cidr blocks have to be added
-  external_ssh = ["185.96.126.106/32", "94.20.66.187/32"]
-  vpc          = module.eks-cluster.cluster-vpc
-  subnet_ids   = local.cluster_subnet_ids
-  # Possible values are "private" or "public"
-  subnet_type  = "public"
-  alb          = true
-  # Possible values are "none" or a valid hosted zone id
-  # If not set to "none" subdomain must be set as well
-  hosted_zone_id = module.huseynov-net.zone_id
-  # Internal alb alias records must be added only to a private hosted zone
-  internal_alb = false
-  # Possible values are "none" or a valid private hosted zone id
-  internal_hosted_zone_id = "none"
-  # Enter certificate arn to enable https listener and http -> https redirect
-  # Possible values are "none" or a valid certificate arn
-  # If not set to "none" tls_termination must be turned on
-  # If alb is set to "none" then certificate_arn must be set to "none" or omitted.
-  certificate_arn = module.huseynov-net.certificate_arn
-  tls_termination = true
-  # Possible values are "none" or a valid subdomain
-  # If not set to "none" hosted_zone_id must be set as well
-  subdomain = "gitlab"
-  # Possible values are "none" or a valid subdomain
-  # If not set to "none" hosted_zone_id must be set as well
-  registry_subdomain = "docker"
-  # Must be noted that if alb is set to "none" and subnet_type
-  # is set to "private" setting both subdomain and hosted_zone_id
-  # Will trigger an error, but if subnet_type is set to be public
-  # dns record will be created for elastic ip of the instance
-  # without tls_termination
   providers = {
     aws = aws
   }
 }
-
-# Provision an EKS cluster
+##########################################################################################################
+/* >>>>>>>>>>>>>>>>>>>>>>>>>>       This module provisions an EKS cluster      <<<<<<<<<<<<<<<<<<<<<<<<<<<
+  load_balancer - creates aws load balancer controller resources including service account and all iam
+   policies for the service account
+  fargate_only_cluster - creates fargate profile for kube-system namespace to enable coredsn and other
+   system resources created after cluster provisioning
+*/
+# Provision
 module "eks-cluster" {
   source               = "./modules/eks-cluster"
   cluster_name         = "gitlab-cluster"
@@ -94,9 +96,11 @@ module "eks-cluster" {
     kubernetes = kubernetes
   }
 }
+##########################################################################################################
 
+# TODO: AWS backups integrate with gitlab instance and make modular for all
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
-# TODO: AWS backups integrate with gitlab instance and make modular for all
+
 
 
