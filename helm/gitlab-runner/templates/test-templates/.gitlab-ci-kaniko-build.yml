@@ -12,7 +12,7 @@ before_script:
 ##################################################################################################################
 TEST:
   stage: test
-    #variables:
+  #variables:
   #http_proxy: "http://localhost:5050"
 
   image:
@@ -23,15 +23,15 @@ TEST:
     - |-
       ls -la
       echo ${PWD}
-  - echo "${CI_REGISTRY_IMAGE}:test"
+    - echo "${CI_REGISTRY_IMAGE}:test"
     - ls -la /kaniko/.docker
 
-    script:
-      - /kaniko/executor
-        --context "${CI_PROJECT_DIR}"
-        --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
-        --destination "${CI_REGISTRY_IMAGE}:test"
-        --verbosity trace
-      #--build-arg http_proxy=$https_proxy
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:test"
+      --verbosity trace
+    #--build-arg http_proxy=$https_proxy
 
 ##################################################################################################################

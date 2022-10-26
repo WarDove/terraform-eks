@@ -42,7 +42,7 @@ module "gitlab-instance" {
   volume_size             = 10
   encrypted_volume        = false
   public_key              = file("${path.cwd}/files/id_rsa.pub")
-  external_ssh            = ["185.96.126.106/32", "94.20.66.187/32"]
+  external_ssh            = ["185.96.126.106/32", "94.20.66.206/32"]
   vpc                     = module.eks-cluster.cluster-vpc
   subnet_ids              = local.cluster_subnet_ids
   subnet_type             = "public"
