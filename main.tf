@@ -29,9 +29,9 @@ module "gitlab-instance" {
 
   user_data = templatefile("${path.cwd}/templates/gitlab_user_data.tpl",
     {
-      node_name  = "Gitlab-Instance-Test"
-      gitlab_url = "https://gitlab.huseynov.net"
-      repository_url = "https://docker.huseynov.net"
+      node_name                = "Gitlab-Instance-Test"
+      gitlab_url               = "https://gitlab.huseynov.net"
+      repository_url           = "https://docker.huseynov.net"
       X-Forwarded-Proto-Header = "https"
   })
 
@@ -41,8 +41,8 @@ module "gitlab-instance" {
   vpc          = module.eks-cluster.cluster-vpc
   subnet_ids   = local.cluster_subnet_ids
   # Possible values are "private" or "public"
-  subnet_type = "public"
-  alb = true
+  subnet_type  = "public"
+  alb          = true
   internal_alb = true
   # Enter certificate arn to enable https listener and http -> https redirect
   # Possible values are "none" or a valid certificate arn

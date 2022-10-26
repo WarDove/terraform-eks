@@ -31,7 +31,7 @@ resource "null_resource" "patch-coredns" {
     # kubeconfig has to be set up for kubectl patch commands
     aws_eks_fargate_profile.eks-cluster-fargate-kubesystem,
     data.utils_aws_eks_update_kubeconfig.bootstrap-kubeconfig
-    ]
+  ]
 
   triggers = {
     api_endpoint_up = aws_eks_cluster.eks-cluster.endpoint

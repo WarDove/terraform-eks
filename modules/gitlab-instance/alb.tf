@@ -1,5 +1,5 @@
 resource "aws_security_group" "alb" {
-  count  = local.create_alb ? 1 : 0
+  count  = var.internal_alb || var.alb ? 1 : 0
   name   = "${var.name}-alb-sg"
   vpc_id = var.vpc.id
 
@@ -38,7 +38,7 @@ resource "aws_lb" "main" {
   internal                   = false
   load_balancer_type         = "application"
   security_groups            = aws_security_group.alb[*].id
-  subnets                    = local.internal_alb ? var.subnet_ids["private"] : var.subnet_ids["public"]
+  subnets                    = var.subnet_ids["public"]
   enable_deletion_protection = false
 
   tags = {
@@ -52,7 +52,7 @@ resource "aws_lb" "internal" {
   internal                   = true
   load_balancer_type         = "application"
   security_groups            = aws_security_group.alb[*].id
-  subnets                    = local.internal_alb ? var.subnet_ids["private"] : var.subnet_ids["public"]
+  subnets                    = var.subnet_ids["private"]
   enable_deletion_protection = false
 
   tags = {
@@ -68,7 +68,7 @@ resource "random_id" "target_group_id" {
 }
 
 resource "aws_alb_target_group" "main" {
-  count       = var.alb || var.internal.alb ? 1 : 0
+  count       = var.alb || var.internal_alb ? 1 : 0
   name        = "${var.name}-instance-${random_id.target_group_id.hex}"
   port        = var.tls_termination ? 443 : 80
   protocol    = var.tls_termination ? "HTTPS" : "HTTP"
@@ -96,15 +96,26 @@ resource "aws_alb_target_group" "main" {
 }
 
 resource "aws_lb_target_group_attachment" "main" {
-  count            = var.alb || var.internal.alb ? 1 : 0
+  count            = var.alb || var.internal_alb ? 1 : 0
   target_group_arn = aws_alb_target_group.main[0].arn
   target_id        = aws_instance.main.id
   port             = var.tls_termination ? 443 : 80
 }
 
-# HTTP only listener#########################
+# If subnet is public and no alb created then eip will be allocated
+resource "aws_eip" "instance_eip" {
+  count    = local.allocate_eip ? 1 : 0
+  instance = aws_instance.main.id
+  vpc      = true
+  tags = {
+    Name = "${var.name}-instance"
+  }
+}
+
+# External ALB listeners
+# HTTP only listener
 resource "aws_alb_listener" "http_only" {
-  count             = var.alb || var.internal.alb && !var.tls_termination ? 1 : 0
+  count             = var.alb && !var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 80
   protocol          = "HTTP"
@@ -117,7 +128,7 @@ resource "aws_alb_listener" "http_only" {
 
 # HTTPS
 resource "aws_alb_listener" "http" {
-  count             = local.create_alb && var.tls_termination ? 1 : 0
+  count             = var.alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 80
   protocol          = "HTTP"
@@ -135,7 +146,7 @@ resource "aws_alb_listener" "http" {
 
 # HTTP to HTTPS redirect
 resource "aws_alb_listener" "https" {
-  count             = local.create_alb && var.tls_termination ? 1 : 0
+  count             = var.alb && var.tls_termination ? 1 : 0
   load_balancer_arn = aws_lb.main[0].id
   port              = 443
   protocol          = "HTTPS"
@@ -149,12 +160,50 @@ resource "aws_alb_listener" "https" {
   }
 }
 
-# If subnet is public and no alb created then eip will be allocated
-resource "aws_eip" "instance_eip" {
-  count    = local.allocate_eip ? 1 : 0
-  instance = aws_instance.main.id
-  vpc      = true
-  tags = {
-    Name = "${var.name}-instance"
+# Internal ALB listeners
+# HTTP only listener
+resource "aws_alb_listener" "internal_http_only" {
+  count             = var.internal_alb && !var.tls_termination ? 1 : 0
+  load_balancer_arn = aws_lb.internal[0].id
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = aws_alb_target_group.main[0].id
+    type             = "forward"
+  }
+}
+
+# HTTPS
+resource "aws_alb_listener" "internal_http" {
+  count             = var.internal_alb && var.tls_termination ? 1 : 0
+  load_balancer_arn = aws_lb.internal[0].id
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = 443
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+# HTTP to HTTPS redirect
+resource "aws_alb_listener" "internal_https" {
+  count             = var.alb && var.tls_termination ? 1 : 0
+  load_balancer_arn = aws_lb.internal[0].id
+  port              = 443
+  protocol          = "HTTPS"
+
+  ssl_policy      = "ELBSecurityPolicy-2016-08"
+  certificate_arn = var.certificate_arn
+
+  default_action {
+    target_group_arn = aws_alb_target_group.main[0].id
+    type             = "forward"
   }
 }

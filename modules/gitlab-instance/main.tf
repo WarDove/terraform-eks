@@ -13,7 +13,7 @@ data "aws_ami" "main" {
   # both must be true or false: true == arn , false == none
   lifecycle {
     precondition {
-      condition     = local.create_alb || var.certificate_arn == "none"
+      condition     = var.alb || var.internal_alb || var.certificate_arn == "none"
       error_message = "no alb listener will be created to attach the certificate!"
     }
     precondition {
