@@ -55,6 +55,10 @@ resource "helm_release" "gitlab-runner" {
     "${file("${path.cwd}/helm/gitlab-runner/values.yaml")}"
   ]
 
+  lifecycle {
+    ignore_changes = [values]
+  }
+
   set {
     name  = "runnerRegistrationToken"
     value = "vXw9yD_Rg3m-FYsjAaJ1"
