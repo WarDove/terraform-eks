@@ -5,7 +5,7 @@
 # * https://www.terraform.io/docs/backends/types/s3.html
 
 # This script creates the AWS S3 bucket and DynamoDB that Terraform needs to
-# have a lockable remote state, outputs a backend config.
+# have a lockable remote state, outputs.tf a backend config.
 # You need to have terraform.tfvars configured with the aws profile.
 
 # [-p|--prod] flag bootstraps to production environment. expects the varfile to be

@@ -20,7 +20,7 @@ locals {
     ],
 
     profile-2 = [
-      { namespace = "gitlab",
+      { namespace = "gitlab-runner",
       labels = {} }
     ]
   }

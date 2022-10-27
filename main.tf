@@ -34,6 +34,7 @@ module "huseynov-net" {
   user_data               - has to be configured respectively depending on previously mentioned variables
 */
 module "gitlab-instance" {
+  #count = 0
   source                  = "./modules/gitlab-instance"
   name                    = "gitlab"
   ami_owners              = ["099720109477"]
@@ -74,7 +75,6 @@ module "gitlab-instance" {
   fargate_only_cluster - creates fargate profile for kube-system namespace to enable coredsn and other
    system resources created after cluster provisioning
 */
-# Provision
 module "eks-cluster" {
   source               = "./modules/eks-cluster"
   cluster_name         = "gitlab-cluster"
@@ -93,6 +93,19 @@ module "eks-cluster" {
     aws        = aws
     utils      = utils
     helm       = helm
+    kubernetes = kubernetes
+  }
+}
+##########################################################################################################
+/* >>>>>>>>>>>>>>>>>>>>       This module provisions gitlab-runners on EKS      <<<<<<<<<<<<<<<<<<<<<<<<<<
+*/
+module "gitlab-runners" {
+  source               = "./modules/gitlab-runners"
+  depends_on = [
+  module.eks-cluster
+  ]
+
+  providers = {
     kubernetes = kubernetes
   }
 }

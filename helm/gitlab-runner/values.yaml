@@ -4,9 +4,9 @@ image:
 
 imagePullPolicy: IfNotPresent
 
-gitlabUrl: https://gitlab.huseynov.net/
+#gitlabUrl: https://gitlab.huseynov.net/
 
-runnerRegistrationToken: "eQsk2YsyBGJaAFd4iJs6"
+#runnerRegistrationToken: "eQsk2YsyBGJaAFd4iJs6"
 
 terminationGracePeriodSeconds: 3600
 concurrent: 30
@@ -18,7 +18,7 @@ rbac:
   create: false
   rules: []
   clusterWideAccess: false
-  serviceAccountName: gitlab
+  #serviceAccountName: gitlab
   podSecurityPolicy:
     enabled: false
     resourceNames:
