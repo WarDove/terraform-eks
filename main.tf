@@ -98,6 +98,7 @@ module "eks-cluster" {
 }
 ##########################################################################################################
 
+# TODO: ECR pull images from pod
 # TODO: AWS backups integrate with gitlab instance and make modular for all
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: Add ec2 node groups with some logic to eks module
