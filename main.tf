@@ -100,6 +100,7 @@ module "eks-cluster" {
 /* >>>>>>>>>>>>>>>>>>>>       This module provisions gitlab-runners on EKS      <<<<<<<<<<<<<<<<<<<<<<<<<<
 */
 module "gitlab-runners" {
+  count = var.runner_registration_token != "" ? 1 : 0
   source = "./modules/gitlab-runners"
   depends_on = [
     module.eks-cluster,
