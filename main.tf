@@ -100,10 +100,14 @@ module "eks-cluster" {
 /* >>>>>>>>>>>>>>>>>>>>       This module provisions gitlab-runners on EKS      <<<<<<<<<<<<<<<<<<<<<<<<<<
 */
 module "gitlab-runners" {
-  source               = "./modules/gitlab-runners"
+  source = "./modules/gitlab-runners"
   depends_on = [
-  module.eks-cluster
+    module.eks-cluster,
+    module.gitlab-instance
   ]
+
+  runner_registration_token = var.runner_registration_token
+  gitlab_url                = "https://gitlab.huseynov.net/"
 
   providers = {
     kubernetes = kubernetes

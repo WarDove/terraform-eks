@@ -8,7 +8,7 @@ resource "kubernetes_namespace" "gitlab-runner" {
 
 resource "kubernetes_service_account" "gitlab-runner" {
   metadata {
-    name = "gitlab-runner"
+    name      = "gitlab-runner"
     namespace = kubernetes_namespace.gitlab-runner.metadata[0].name
   }
 }
@@ -61,12 +61,12 @@ resource "helm_release" "gitlab-runner" {
 
   set {
     name  = "runnerRegistrationToken"
-    value = "vXw9yD_Rg3m-FYsjAaJ1"
+    value = var.runner_registration_token
   }
 
   set {
     name  = "gitlabUrl"
-    value = "https://gitlab.huseynov.net/"
+    value = var.gitlab_url
   }
 
   set {
