@@ -116,11 +116,13 @@ module "gitlab-runners" {
   }
 }
 ##########################################################################################################
-
+# TODO: Add ec2 node groups with some logic to eks module
+# TODO: Implement Vertical and Horizontal auto scaling with eks module
 # TODO: ECR pull images from pod - OIDC provider role for service account
 # TODO: AWS backups integrate with gitlab instance and make modular for all
-# TODO: Implement Vertical and Horizontal auto scaling with eks module
-# TODO: Add ec2 node groups with some logic to eks module
+
+
+
 
 
 
