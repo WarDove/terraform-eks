@@ -7,5 +7,7 @@ variable "profile" {}
 variable "account_id" {}
 variable "public_api" {}
 variable "load_balancer" {}
-variable "fargate_profiles" {}
+variable "fargate_profiles" {
+  default = {}
+}
 variable "fargate_only_cluster" {}
