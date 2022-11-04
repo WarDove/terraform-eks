@@ -1,3 +1,4 @@
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group
 data "aws_iam_policy_document" "eks-node-role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -16,7 +17,7 @@ resource "aws_iam_role" "eks-node-role" {
 
 resource "aws_iam_role_policy_attachment" "eks-node-role-main" {
   role       = aws_iam_role.eks-node-role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"  #AmazonEC2ContainerRegistryPowerUser
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy" #AmazonEC2ContainerRegistryPowerUser
 }
 
 resource "aws_iam_role_policy_attachment" "eks-node-role-ecr" {
@@ -36,9 +37,9 @@ resource "aws_iam_role_policy_attachment" "eks-node-role-ecr" {
 */
 
 resource "aws_eks_node_group" "eks-node-group" {
-  for_each = {}
+  for_each        = var.managed_node_groups
   cluster_name    = aws_eks_cluster.eks-cluster.name
-  node_group_name = each.value.group_name
+  node_group_name = each.key
   node_role_arn   = aws_iam_role.eks-node-role
   subnet_ids      = each.value.subnet_type == "private" ? aws_subnet.private_subnet[*].id : aws_subnet.public_subnet[*].id
 
@@ -52,23 +53,22 @@ resource "aws_eks_node_group" "eks-node-group" {
     max_unavailable = each.value.max_unavailable
   }
   force_update_version = true
-  capacity_type = each.value.capacity_type
-  ami_type = ""
-  disk_size = ""
-  instance_types = []
-  labels = {}
+  capacity_type        = each.value.capacity_type
+  ami_type             = each.value.ami_type
+  disk_size            = each.value.disk_size
+  instance_types       = each.value.instance_types
+  labels               = {}
 
   remote_access {
-    ec2_ssh_key = ""
+    ec2_ssh_key               = each.value.ec2_ssh_key
     source_security_group_ids = ""
   }
-
+  # The Kubernetes taints to be applied to the nodes in the node group.
   taint {
-    effect = ""
-    key    = ""
-    value = ""
+    effect = each.value.effect
+    key    = each.value.key
+    value  = each.value.value
   }
-
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [

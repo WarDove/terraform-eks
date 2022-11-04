@@ -81,6 +81,7 @@ module "eks-cluster" {
   public_api           = true
   load_balancer        = true
   fargate_only_cluster = true
+  managed_node_groups  = local.managed_node_groups
   fargate_profiles     = local.fargate_profiles
   vpc_cidr             = "10.0.0.0/16"
   az_count             = 2
@@ -100,7 +101,7 @@ module "eks-cluster" {
 /* >>>>>>>>>>>>>>>>>>>>       This module provisions gitlab-runners on EKS      <<<<<<<<<<<<<<<<<<<<<<<<<<
 */
 module "gitlab-runners" {
-  count = var.runner_registration_token != "" ? 1 : 0
+  count  = var.runner_registration_token != "" ? 1 : 0
   source = "./modules/gitlab-runners"
   depends_on = [
     module.eks-cluster,
