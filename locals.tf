@@ -47,8 +47,8 @@ locals {
       instance_types   = ["t3.small", "t3.medium", "t3.large"]
       ec2_ssh_key      = "eks-admin"
       ec2_ssh_key_path = "${path.cwd}/files/id_rsa.pub" # specify path for public key location
-      public_key       = file("${path.cwd}/files/id_rsa.pub")
-      external_ssh     = ["185.96.126.106/32", "94.20.66.206/32"]
+      public_key              = file("${path.cwd}/files/id_rsa.pub")
+      external_ssh            = ["185.96.126.106/32", "94.20.66.206/32"]
       # The Kubernetes taints to be applied to the nodes in the node group
       effect = ""
       key    = ""
