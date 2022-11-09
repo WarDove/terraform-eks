@@ -34,7 +34,7 @@ module "huseynov-net" {
   user_data               - has to be configured respectively depending on previously mentioned variables
 */
 module "gitlab-instance" {
-  #count = 0
+  count = 0
   source                  = "./modules/gitlab-instance"
   name                    = "gitlab"
   ami_owners              = ["099720109477"]
@@ -74,15 +74,18 @@ module "gitlab-instance" {
    policies for the service account
   fargate_only_cluster - creates fargate profile for kube-system namespace to enable coredsn and other
    system resources created after cluster provisioning
+  managed_node_groups -
+  external_ssh -
 */
 module "eks-cluster" {
   source               = "./modules/eks-cluster"
   cluster_name         = "gitlab-cluster"
   public_api           = true
   load_balancer        = true
-  fargate_only_cluster = true
+  #fargate_profiles     = local.fargate_profiles
   managed_node_groups  = local.managed_node_groups
-  fargate_profiles     = local.fargate_profiles
+  public_key           = file("${path.cwd}/files/id_rsa.pub")
+  external_ssh         = ["185.96.126.106/32", "94.20.66.206/32"]
   vpc_cidr             = "10.0.0.0/16"
   az_count             = 2
   az_names             = local.az_names
@@ -117,8 +120,12 @@ module "gitlab-runners" {
   }
 }
 ##########################################################################################################
+# TODO: Node affinity rules for spinning system resources on on-demand groups
 # TODO: Add ec2 node groups with some logic to eks module
 # TODO: Implement Vertical and Horizontal auto scaling with eks module
+# https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html#cluster-autoscaler
+# https://www.eksworkshop.com/beginner/080_scaling/
+# https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/
 # TODO: ECR pull images from pod - OIDC provider role for service account
 # TODO: AWS backups integrate with gitlab instance and make modular for all
 

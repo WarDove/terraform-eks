@@ -33,7 +33,7 @@ locals {
 
   managed_node_groups = {
 
-    group-1 = {
+    spot_group = {
       subnet_type     = "private" # private or public
       desired_size    = 1
       max_size        = 2
@@ -41,18 +41,13 @@ locals {
       max_unavailable = 1
       labels          = {}
       # https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html
-      capacity_type    = "SPOT"
-      ami_type         = "AL2_x86_64"
-      disk_size        = 20
-      instance_types   = ["t3.small", "t3.medium", "t3.large"]
-      ec2_ssh_key      = "eks-admin"
-      ec2_ssh_key_path = "${path.cwd}/files/id_rsa.pub" # specify path for public key location
-      public_key              = file("${path.cwd}/files/id_rsa.pub")
-      external_ssh            = ["185.96.126.106/32", "94.20.66.206/32"]
+      capacity_type  = "SPOT"
+      ami_type       = "AL2_x86_64"
+      disk_size      = 20
+      instance_types = ["t3.small", "t3.medium", "t3.large"]
+      labels         = { spot_instance = "true" }
       # The Kubernetes taints to be applied to the nodes in the node group
-      effect = ""
-      key    = ""
-      value  = ""
+      taint = {}
     }
   }
 }

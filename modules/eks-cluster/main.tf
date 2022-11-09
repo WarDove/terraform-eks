@@ -26,6 +26,14 @@ resource "aws_iam_role_policy_attachment" "eks-cluster-role" {
 
 # EKS-CLUSTER
 resource "aws_eks_cluster" "eks-cluster" {
+
+  lifecycle {
+    precondition {
+      condition     = var.managed_node_groups != {} || var.fargate_profiles != {}
+      error_message = "No defined node groups or fargate profiles!"
+    }
+  }
+
   name                      = var.cluster_name
   role_arn                  = aws_iam_role.eks-cluster-role.arn
   enabled_cluster_log_types = ["api"]

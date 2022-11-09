@@ -20,7 +20,7 @@ resource "aws_eks_fargate_profile" "eks-cluster-fargate" {
 # If this cluster is fargate only (no ec2 node groups) then kube-system workloads not managed
 # by aws (i.e coredns add-on pods) have to be provisioned by a fargate group
 resource "aws_eks_fargate_profile" "eks-cluster-fargate-kubesystem" {
-  count                  = var.fargate_only_cluster ? 1 : 0
+  count                  = local.fargate_only_cluster ? 1 : 0
   cluster_name           = aws_eks_cluster.eks-cluster.name
   fargate_profile_name   = "fargate-profile-kubesystem"
   pod_execution_role_arn = aws_iam_role.fargate-pod-execution-role.arn

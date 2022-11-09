@@ -36,11 +36,46 @@ resource "aws_iam_role_policy_attachment" "eks-node-role-ecr" {
    https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html
 */
 
+resource "aws_security_group" "source_security_group" {
+  name        = "mng_source_security_group"
+  description = "Security group for allowing ssh access into managed node groups"
+  vpc_id      = aws_vpc.main.id
+
+  # Adding external ssh access if at least one cidr block is set in external_ssh
+  dynamic "ingress" {
+    for_each = length(var.external_ssh) > 0 ? [1] : []
+    content {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = var.external_ssh
+    }
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "mng_source_security_group"
+  }
+}
+
+resource "aws_key_pair" "ec2_ssh_key" {
+  count      = var.managed_node_groups != {} ? 1 : 0
+  key_name   = "mng_ssh_key"
+  public_key = var.public_key
+}
+
 resource "aws_eks_node_group" "eks-node-group" {
+
   for_each        = var.managed_node_groups
   cluster_name    = aws_eks_cluster.eks-cluster.name
   node_group_name = each.key
-  node_role_arn   = aws_iam_role.eks-node-role
+  node_role_arn   = aws_iam_role.eks-node-role.arn
   subnet_ids      = each.value.subnet_type == "private" ? aws_subnet.private_subnet[*].id : aws_subnet.public_subnet[*].id
 
   scaling_config {
@@ -57,17 +92,20 @@ resource "aws_eks_node_group" "eks-node-group" {
   ami_type             = each.value.ami_type
   disk_size            = each.value.disk_size
   instance_types       = each.value.instance_types
-  labels               = {}
+  labels               = each.value.labels
 
   remote_access {
-    ec2_ssh_key               = each.value.ec2_ssh_key
-    source_security_group_ids = ""
+    ec2_ssh_key               = aws_key_pair.ec2_ssh_key[0].key_name
+    source_security_group_ids = [aws_security_group.source_security_group.id]
   }
   # The Kubernetes taints to be applied to the nodes in the node group.
-  taint {
-    effect = each.value.effect
-    key    = each.value.key
-    value  = each.value.value
+  dynamic "taint" {
+    for_each = each.value.taint != {} ? [1] : []
+    content {
+      effect = each.value.taint.effect
+      key    = each.value.taint.key
+      value  = each.value.taint.value
+    }
   }
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
@@ -75,4 +113,8 @@ resource "aws_eks_node_group" "eks-node-group" {
     aws_iam_role_policy_attachment.eks-node-role-main,
     aws_iam_role_policy_attachment.eks-node-role-ecr
   ]
+
+  lifecycle {
+    ignore_changes = [scaling_config[0].desired_size]
+  }
 }

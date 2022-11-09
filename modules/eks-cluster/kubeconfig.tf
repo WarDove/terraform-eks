@@ -35,7 +35,7 @@ resource "null_resource" "patch-coredns" {
 
   triggers = {
     api_endpoint_up = aws_eks_cluster.eks-cluster.endpoint
-    fargate_only    = var.fargate_only_cluster
+    fargate_only    = local.fargate_only_cluster
   }
 
   provisioner "local-exec" {
@@ -45,7 +45,7 @@ resource "null_resource" "patch-coredns" {
     # On linux no entrypoint needed or you may enter "/bin/bash"
     interpreter = ["bash"]
     environment = {
-      FARGATE_ONLY = var.fargate_only_cluster
+      FARGATE_ONLY = local.fargate_only_cluster
     }
   }
 }

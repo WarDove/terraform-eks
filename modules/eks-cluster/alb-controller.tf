@@ -31,7 +31,8 @@ resource "helm_release" "aws-lbc-chart" {
   namespace  = "kube-system"
 
   depends_on = [
-    kubernetes_service_account.aws-lbc
+    kubernetes_service_account.aws-lbc,
+    aws_eks_node_group.eks-node-group
   ]
 
   set {

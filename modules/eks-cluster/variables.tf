@@ -7,7 +7,9 @@ variable "profile" {}
 variable "account_id" {}
 variable "public_api" {}
 variable "load_balancer" {}
-variable "fargate_only_cluster" {}
+variable "external_ssh" {}
+variable "public_key" {}
+
 variable "managed_node_groups" {
   default = {}
 }
