@@ -17,10 +17,16 @@ resource "aws_iam_role" "eks-node-role" {
 
 resource "aws_iam_role_policy_attachment" "eks-node-role-main" {
   role       = aws_iam_role.eks-node-role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy" #AmazonEC2ContainerRegistryPowerUser
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "eks-node-role-ecr" {
+  role       = aws_iam_role.eks-node-role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+# To enable nodes to push into ECR - as well as the pods that inherit this role.
+resource "aws_iam_role_policy_attachment" "eks-node-role-ecr-write" {
   role       = aws_iam_role.eks-node-role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
 }
